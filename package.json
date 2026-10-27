@@ -17,7 +17,8 @@
     "test:redteam": "node scripts/redteam.mjs",
     "faq:check": "node scripts/faq-bank.mjs",
     "faq:export": "node scripts/faq-bank.mjs --export",
-    "ai:check": "node scripts/check-sub2api.mjs"
+    "ai:check": "node scripts/check-sub2api.mjs",
+    "ai:check:grounded": "node scripts/check-live-grounded.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
