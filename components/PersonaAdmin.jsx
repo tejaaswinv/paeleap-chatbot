@@ -146,6 +146,7 @@ export default function PersonaAdmin() {
       <header className="admin-topbar">
         <a className="admin-wordmark" href="/">paeleap <span>/ studio</span></a>
         <div className="admin-topbar-actions">
+          <a className="admin-text-button" href="/admin/safety">{language === "zh" ? "安全测试中心" : "Safety Lab"}</a>
           <div className="language-toggle" aria-label="Language">
             <button type="button" aria-pressed={language === "en"} className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
             <button type="button" aria-pressed={language === "zh"} className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>中文</button>
