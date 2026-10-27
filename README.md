@@ -176,3 +176,7 @@ AI_BASE_URL=https://api.miaoquai.com/v1 AI_API_STYLE=responses AI_MODEL=deepseek
 ```
 
 This also requires `SUB2API_API_KEY` in the environment. The command makes **one real inference call** with a fixed non-sensitive West Lake question and checks the evidence-selection contract; it prints no provider prose, credentials or raw prompts. Ordinary tests, default GitHub CI and visitors **never trigger this call**. It is not a full chatbot/deployed-auth or live safety assessment. The exact model ID must be supported by your provider account group.
+
+
+## China ScamShield (travel payment protection)
+TourMate provides fixed bilingual cautionary guidance for **specific suspicious** China ticket, booking, QR-code and payment questions, including post-payment reports. The original input guardrails run first. Generic Alipay, ticket and general scam-prevention FAQ requests still use approved knowledge records. ScamShield checks **no links, accounts, merchants, QR codes, payment requests or provider websites live** and cannot determine whether a transaction is genuine or fraudulent. It never repeats the submitted URL or payment handle in the answer. The response uses the `scam_prevention` mode and Trust Passport `safety_notice` rather than presenting the content as verified evidence. Submitted messages remain part of ordinary authenticated conversation history; users should never paste passwords or verification codes. Run `node --test tests/scam-shield.test.mjs` for focused checks.

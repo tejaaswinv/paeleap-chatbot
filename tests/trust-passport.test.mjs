@@ -43,3 +43,11 @@ test("social support receipts are based on the published profile, not fabricated
   assert.equal(receipt.referenceCount,0);
   assert.equal(receipt.liveChecked,false);
 });
+
+test("ScamShield is safety advice, not a curated fact or a verified seller",()=>{
+  const r=buildTrustPassport({status:"allowed",mode:"scam_prevention",personaVersion:1});
+  assert.equal(r.basis,"safety_notice");
+  assert.equal(r.referenceCount,0);
+  assert.equal(r.liveChecked,false);
+  assert.equal(r.linksChecked,false);
+});
