@@ -34,6 +34,7 @@ test("ordinary FAQ questions bypass ScamShield",()=>{
     "How can foreigners use Alipay in China?",
     "Where can I book high-speed train tickets?",
     "How can tourists avoid scams in China?",
+    "I want to avoid being scammed by unofficial ticket sellers. What precautions should a tourist take?",
     "Tell me about West Lake",
     "Do I need to pay a deposit when booking a hotel?",
     "What are the ticket prices?",
