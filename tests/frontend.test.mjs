@@ -52,3 +52,12 @@ test("Trust Passport is optional, strictly validated and never claims live verif
   assert.equal(parseChatResponse({...payload,trust:undefined}).trust,undefined);
   assert.equal(parseChatResponse({...payload,safety:{status:"blocked"},trust}).trust,undefined);
 });
+
+test("unanswered in-scope travel questions do not show an out-of-scope reason",()=>{
+  const base={reply:"Current guide material does not answer this",conversationId,sources:[],safety:{status:"redirected"}};
+  assert.equal(parseChatResponse({...base,safety:{status:"redirected",reason:"unanswered"}}).safetyReason,"unanswered");
+  assert.equal(parseChatResponse({...base,safety:{status:"redirected",reason:"out_of_scope"}}).safetyReason,"out_of_scope");
+  assert.equal(parseChatResponse({...base,safety:{status:"redirected",reason:"provider_unavailable"}}).safetyReason,"provider_unavailable");
+  assert.equal(parseChatResponse({...base,safety:{status:"redirected",reason:"spoof"}}).safetyReason,undefined);
+  assert.equal(parseChatResponse({...base,safety:{status:"blocked",reason:"unanswered"}}).safetyReason,undefined);
+});

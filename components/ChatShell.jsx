@@ -9,6 +9,7 @@ import { DEFAULT_PERSONA_ID, parsePublicPersona, personaIdFromSearch, provenance
 import {
   MAX_MESSAGE_LENGTH,
   SAFETY_LABELS,
+  SAFETY_REASON_LABELS,
   buildChatBody,
   chatErrorMessage,
   makeMessageId,
@@ -158,12 +159,15 @@ function Brand({ name = "paeleap", avatar = "旅" }) {
   );
 }
 
-function SafetyBadge({ status, language }) {
+function SafetyBadge({ status, reason, language }) {
   if (!status || status === "allowed") return null;
+  const label = status === "redirected" && reason
+    ? SAFETY_REASON_LABELS[language][reason] || SAFETY_LABELS[language][status]
+    : SAFETY_LABELS[language][status];
   return (
     <span className={`safety-badge safety-${status}`}>
       <Icon name="shield" size={14} />
-      {SAFETY_LABELS[language][status]}
+      {label}
     </span>
   );
 }
@@ -183,7 +187,7 @@ function Message({ message, language, copied, onCopy, avatar }) {
               title={new Date(message.createdAt).toLocaleString(language === "zh" ? "zh-CN" : "en-US")}>
               {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" }).format(new Date(message.createdAt))}
             </time>}
-            {assistant && <SafetyBadge status={message.safety} language={language} />}
+            {assistant && <SafetyBadge status={message.safety} reason={message.safetyReason} language={language} />}
             {assistant && message.faq && <span className="grounded-label" title={message.faq.question}>{t.faqLabel} · {message.faq.id}</span>}
             {assistant && message.safety === "allowed" && provenanceLabel(message.ai?.mode, language) && (
               <span className="grounded-label">{provenanceLabel(message.ai.mode, language)}</span>
@@ -508,6 +512,7 @@ export default function ChatShell() {
         content: parsed.reply,
         sources: parsed.sources,
         safety: parsed.safety,
+        ...(parsed.safetyReason ? { safetyReason: parsed.safetyReason } : {}),
         ...(parsed.trust ? { trust: parsed.trust } : {}),
         ...(parsed.ai ? { ai: parsed.ai } : {}),
         ...(parsed.persona ? { persona: parsed.persona } : {}),
