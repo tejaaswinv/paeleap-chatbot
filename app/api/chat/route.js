@@ -143,6 +143,7 @@ export async function POST(request) {
     let generationMode = null;
     let generationSources = [];
     let verified = { reply: classified.reply, status: classified.status };
+    let responseReason = classified.status === "redirected" ? "out_of_scope" : null;
     const identityQuestion = /^(?:who are you|what is your name|你是谁|你是誰|你叫什么名字|你叫什麼名字)[?？!！。\s]*$/i.test(body.message.trim());
     const personaIdentity = classified.status === "allowed" && persona.id !== DEFAULT_PERSONA_ID && identityQuestion;
     if (personaIdentity) {
@@ -165,6 +166,7 @@ export async function POST(request) {
           generationSources = generated.sources;
           generationUsed = true;
           generationMode = generated.mode;
+          responseReason = generated.status === "redirected" ? "unanswered" : null;
         } catch (error) {
           // Never turn raw upstream errors into user-visible text.
           providerDegraded = true;
@@ -190,6 +192,7 @@ export async function POST(request) {
           selection = matchFaqOffline(body.message.trim(), faqs, sanitizeFaqHistory(history), { allowReviewedTopics: persona.id !== DEFAULT_PERSONA_ID });
         }
         faq = selection ? faqs.find((item) => item.id === selection.faqId) : null;
+        responseReason = faq ? null : providerDegraded ? "provider_unavailable" : "unanswered";
         verified = faq ? (persona.id === DEFAULT_PERSONA_ID ? validateOutput(faq[language === "zh" ? "answer_zh" : "answer_en"], language)
           : { reply: renderEvidenceReply([faq], language, persona), status: "allowed" })
           : { reply: providerDegraded
@@ -220,7 +223,9 @@ export async function POST(request) {
     const trust = buildTrustPassport({
       status, mode: answerMode, sources, personaVersion: persona.version, providerDegraded
     });
-    return json({ reply: verified.reply, conversationId, sources, safety: { status }, persona: publicPersona(persona), trust,
+    return json({ reply: verified.reply, conversationId, sources,
+      safety: { status, ...(status === "redirected" && responseReason ? { reason: responseReason } : {}) },
+      persona: publicPersona(persona), trust,
       ai: { mode: answerMode,
         ...(providerDegraded ? { errorCode: providerErrorCode || "UPSTREAM_UNKNOWN" } : {}) },
       ...(status === "allowed" && faq ? { faq: { id: faq.id, question: faq[language === "zh" ? "question_zh" : "question_en"], category: faq.category } } : {}) });

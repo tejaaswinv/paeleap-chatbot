@@ -113,3 +113,12 @@ test("demo trip restore preserves only structurally valid answer passports", () 
   const malformed=restoreTripCollection(serializeTripCollection({trips:[trip],activeTripId:trip.id}));
   assert.equal(malformed.trips[0].messages[0].trust,undefined);
 });
+
+test("local demo trip restore preserves a validated unanswerable reason",()=>{
+  const trip=createTrip();
+  trip.conversationId=conversationId;
+  trip.messages=[{...reply,id:"unanswered-1",content:"The current travel guide cannot answer that.",safety:"redirected",sources:[],safetyReason:"unanswered"}];
+  const saved=serializeTripCollection({trips:[trip],activeTripId:trip.id});
+  const restored=restoreTripCollection(saved);
+  assert.equal(restored.trips[0].messages[0].safetyReason,"unanswered");
+});

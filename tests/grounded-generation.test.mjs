@@ -89,3 +89,33 @@ test("grounded generation rejects exact mentor persona override before inference
   }), /disallowed/);
   assert.equal(outboundRequests,0);
 });
+
+test("default TourMate no-evidence fallback is China-wide in both languages", async () => {
+  let calls=0;
+  for (const language of ["en", "zh"]) {
+    const result=await generateGroundedReply({
+      message: language === "zh" ? "请介绍从未记录过的旅行项目" : "Explain a made-up tourism activity not recorded in the guide",
+      language, faqs:[], env:config,
+      fetchImpl:async()=>{calls++;return answer('{"decision":"redirect","recordIds":[]}');}
+    });
+    assert.equal(result.status,"redirected");
+    assert.equal(result.reason,"unanswered");
+    assert.equal(result.recordIds.length,0);
+    assert.deepEqual(result.sources,[]);
+    assert.doesNotMatch(result.reply, /museum|exhibition|collection|venue staff|博物馆|展品|藏品/i);
+    assert.match(result.reply, language==="zh" ? /中国旅游/ : /travel across China/);
+  }
+  assert.equal(calls,0,"No evidence must not trigger unsupported model inference");
+});
+
+test("a model-directed default TourMate redirect also avoids museum-only copy", async () => {
+  const reply=await generateGroundedReply({
+    message:"Tell me about West Lake",faqs:CHINA_TOURISM_FAQS,env:config,
+    persona:{id:"tourmate",name:{en:"TourMate"},venue:{en:"China tourism"}},
+    fetchImpl:async()=>answer('{"decision":"redirect","recordIds":[]}')
+  });
+  assert.equal(reply.status,"redirected");
+  assert.equal(reply.reason,"unanswered");
+  assert.doesNotMatch(reply.reply,/exhibitions|collections|venue staff/i);
+  assert.deepEqual(reply.sources,[]);
+});
