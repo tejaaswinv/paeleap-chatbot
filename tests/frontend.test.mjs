@@ -37,3 +37,18 @@ test("documented HTTP errors have usable English and Chinese messages", () => {
     assert.match(chatErrorMessage(status, "zh"), /[\u3400-\u9fff]/);
   }
 });
+
+test("Trust Passport is optional, strictly validated and never claims live verification", () => {
+  const sources=[{name:"UNESCO",url:"https://whc.unesco.org/en/list/1334"}];
+  const trust={ schemaVersion:1,basis:"curated_knowledge",referenceCount:1,
+    knowledgeVersion:2,liveChecked:false,linksChecked:false,limitedByProvider:false };
+  const payload={reply:"Curated travel answer",conversationId,sources,safety:{status:"allowed"},trust};
+  assert.deepEqual(parseChatResponse(payload).trust,trust);
+  assert.equal(parseChatResponse({...payload,trust:{...trust,liveChecked:true}}).trust,undefined);
+  assert.equal(parseChatResponse({...payload,trust:{...trust,referenceCount:2}}).trust,undefined);
+  assert.equal(parseChatResponse({...payload,trust:{...trust,basis:"safety_notice"}}).trust,undefined);
+  assert.equal(parseChatResponse({...payload,trust:{...trust,knowledgeVersion:"v2"}}).trust,undefined);
+  assert.equal(parseChatResponse({...payload,trust:{...trust,extraPrompt:"secrets"}}).trust.extraPrompt,undefined);
+  assert.equal(parseChatResponse({...payload,trust:undefined}).trust,undefined);
+  assert.equal(parseChatResponse({...payload,safety:{status:"blocked"},trust}).trust,undefined);
+});

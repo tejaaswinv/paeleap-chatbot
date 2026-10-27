@@ -104,6 +104,18 @@ Use a valid Supabase session access token; **never** send the service-role key. 
 
 `localDemoMode` describes the local authentication bypass; `aiMockMode` describes offline versus AI matching. `faqBank` reports configured source, expected count and matching mode, not database health. These are separate settings. Configuration flags reject example placeholders, but do not establish that external services are reachable.
 
+## Trust Passport (answer provenance)
+
+Chat API responses now include an optional `trust` receipt generated **by the server**.
+The bilingual chat UI has a collapsible **Answer passport / 回答依据** explanation.
+It distinguishes curated knowledge, administrator-published persona identities, safety
+responses, and out-of-scope requests. It shows reference-link count, published profile
+version (when present), and whether a provider fallback occurred. It explicitly says
+neither references nor time-sensitive conditions are checked live during an answer.
+This is a transparency feature, not fact-checking, a confidence score, a certification,
+or proof that an upstream source is accurate. Older cloud message history has no
+stored provenance receipt; the UI does not reconstruct one from unsupported data.
+
 ## Components
 
 - `app/page.jsx`, `app/layout.jsx`, `app/globals.css` — root page and responsive visual shell.

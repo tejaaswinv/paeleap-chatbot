@@ -6,6 +6,7 @@ import { authenticate, ensureConversation, getRecentMessages, storeExchange, con
 import { localDemoEnabled, mockAiEnabled } from "../../../lib/config.js";
 import { generateGroundedReply, renderEvidenceReply } from "../../../lib/ai/generate.js";
 import { aiFailureCode } from "../../../lib/ai/diagnostics.js";
+import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
@@ -215,8 +216,12 @@ export async function POST(request) {
         ].slice(-12)
       });
     }
-    return json({ reply: verified.reply, conversationId, sources, safety: { status }, persona: publicPersona(persona),
-      ai: { mode: personaIdentity ? "persona_identity" : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq",
+    const answerMode = personaIdentity ? "persona_identity" : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq";
+    const trust = buildTrustPassport({
+      status, mode: answerMode, sources, personaVersion: persona.version, providerDegraded
+    });
+    return json({ reply: verified.reply, conversationId, sources, safety: { status }, persona: publicPersona(persona), trust,
+      ai: { mode: answerMode,
         ...(providerDegraded ? { errorCode: providerErrorCode || "UPSTREAM_UNKNOWN" } : {}) },
       ...(status === "allowed" && faq ? { faq: { id: faq.id, question: faq[language === "zh" ? "question_zh" : "question_en"], category: faq.category } } : {}) });
   } catch (error) {

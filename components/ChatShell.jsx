@@ -49,6 +49,15 @@ const text = {
     stop: "Stop response",
     enterHint: "Enter to send · Shift + Enter for a new line",
     sourceTitle: "Reference links",
+    receiptTitle: "Answer passport",
+    receiptCurated: "Drawn from curated guide records, not independently checked live.",
+    receiptProfile: "Identity supplied by the published museum assistant profile.",
+    receiptSafety: "A safety response from TourMate's application rules.",
+    receiptUnanswered: "No supported reference answer was returned.",
+    receiptRefs: "Reference links supplied",
+    receiptVersion: "Knowledge profile version",
+    receiptNoLive: "Live prices, hours, closures and source pages were not checked.",
+    receiptDegraded: "The AI provider was unavailable; a fallback was used.",
     faqLabel: "Travel FAQ",
     copied: "Copied",
     copy: "Copy response",
@@ -98,6 +107,15 @@ const text = {
     stop: "停止回复",
     enterHint: "按 Enter 发送 · Shift + Enter 换行",
     sourceTitle: "参考资料链接",
+    receiptTitle: "回答依据",
+    receiptCurated: "内容来自经整理的导览资料，本次没有进行实时独立核查。",
+    receiptProfile: "助手身份来自场馆管理员发布的配置。",
+    receiptSafety: "此回复由 TourMate 应用安全规则生成。",
+    receiptUnanswered: "目前没有足够的已收录资料支持回答。",
+    receiptRefs: "附带参考链接",
+    receiptVersion: "知识配置版本",
+    receiptNoLive: "未实时核查票价、开放时间、关闭情况或链接页面。",
+    receiptDegraded: "AI 服务暂不可用，已启用备用回答。",
     faqLabel: "旅游问答",
     copied: "已复制",
     copy: "复制回复",
@@ -174,6 +192,20 @@ function Message({ message, language, copied, onCopy, avatar }) {
               <Icon name="copy" size={14} />{copied === message.id ? t.copied : t.copy}
             </button>}
           </div>
+        {assistant && message.trust && (
+          <details className="trust-passport">
+            <summary><Icon name="shield" size={14} />{t.receiptTitle}</summary>
+            <div className="trust-passport-body">
+              <p>{message.trust.basis === "curated_knowledge" ? t.receiptCurated
+                : message.trust.basis === "published_profile" ? t.receiptProfile
+                : message.trust.basis === "safety_notice" ? t.receiptSafety : t.receiptUnanswered}</p>
+              <p>{t.receiptRefs}: {message.trust.referenceCount}</p>
+              {message.trust.knowledgeVersion !== null && <p>{t.receiptVersion}: {message.trust.knowledgeVersion}</p>}
+              <p>{t.receiptNoLive}</p>
+              {message.trust.limitedByProvider && <p>{t.receiptDegraded}</p>}
+            </div>
+          </details>
+        )}
         {assistant && message.sources?.length > 0 && (
           <div className="sources-card">
             <p><Icon name="link" size={15} />{t.sourceTitle}</p>
@@ -476,6 +508,7 @@ export default function ChatShell() {
         content: parsed.reply,
         sources: parsed.sources,
         safety: parsed.safety,
+        ...(parsed.trust ? { trust: parsed.trust } : {}),
         ...(parsed.ai ? { ai: parsed.ai } : {}),
         ...(parsed.persona ? { persona: parsed.persona } : {}),
         ...(parsed.faq ? { faq: parsed.faq } : {}),
