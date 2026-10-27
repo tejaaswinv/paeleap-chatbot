@@ -99,3 +99,17 @@ test("local restored context excludes privileged roles and fits the existing API
   assert.ok(history.every((message) => message.role !== "system"));
   assert.ok(JSON.stringify({ message: '"'.repeat(1500), language: "en", conversationId, history }).length < 6000);
 });
+
+test("demo trip restore preserves only structurally valid answer passports", () => {
+  const trip=createTrip();
+  trip.conversationId=conversationId;
+  const valid={schemaVersion:1,basis:"curated_knowledge",referenceCount:1,
+    knowledgeVersion:3,liveChecked:false,linksChecked:false,limitedByProvider:false};
+  trip.messages=[{...reply,id:"trust-1",trust:valid}];
+  const saved=serializeTripCollection({trips:[trip],activeTripId:trip.id});
+  const restored=restoreTripCollection(saved);
+  assert.deepEqual(restored.trips[0].messages[0].trust,valid);
+  trip.messages=[{...reply,id:"trust-1",trust:{...valid,liveChecked:true}}];
+  const malformed=restoreTripCollection(serializeTripCollection({trips:[trip],activeTripId:trip.id}));
+  assert.equal(malformed.trips[0].messages[0].trust,undefined);
+});

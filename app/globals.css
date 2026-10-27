@@ -147,6 +147,12 @@
   .safety-redirected, .safety-sanitized { color: #8a611f; background: #f8efd9; }
   .copy-button { margin-left: auto; padding: 4px 6px; display: inline-flex; align-items: center; gap: 4px; border: 0; color: #81908d; background: transparent; font-size: 9px; }
   .copy-button:hover { color: var(--pine-800); }
+  .trust-passport { margin-top: 7px; padding: 9px 12px; border: 1px solid #d6e5df; border-radius: 9px; background: rgba(255,255,255,.65); color: var(--pine-700); font-size: 11px; }
+  .trust-passport summary { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 11px; font-weight: 750; }
+  .trust-passport summary:hover { text-decoration: underline; }
+  .trust-passport-body { padding: 8px 2px 1px; display: grid; gap: 6px; }
+  .trust-passport-body p { margin: 0; line-height: 1.45; overflow-wrap: anywhere; }
+  .trust-passport-body p:last-child { color: #687d78; }
   .sources-card { margin-top: 8px; padding: 10px 12px; border-left: 2px solid var(--jade-300); background: rgba(228,241,237,.45); }
   .sources-card > p { margin: 0 0 7px; display: flex; align-items: center; gap: 5px; color: #587670; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
   .source-links { display: flex; flex-wrap: wrap; gap: 6px; }
