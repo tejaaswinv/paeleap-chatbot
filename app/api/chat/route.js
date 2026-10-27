@@ -7,6 +7,7 @@ import { localDemoEnabled, mockAiEnabled } from "../../../lib/config.js";
 import { generateGroundedReply, renderEvidenceReply } from "../../../lib/ai/generate.js";
 import { aiFailureCode } from "../../../lib/ai/diagnostics.js";
 import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
+import { socialReply } from "../../../lib/ai/conversation-intents.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
@@ -146,9 +147,15 @@ export async function POST(request) {
     let responseReason = classified.status === "redirected" ? "out_of_scope" : null;
     const identityQuestion = /^(?:who are you|what is your name|你是谁|你是誰|你叫什么名字|你叫什麼名字)[?？!！。\s]*$/i.test(body.message.trim());
     const personaIdentity = classified.status === "allowed" && persona.id !== DEFAULT_PERSONA_ID && identityQuestion;
+    const social = classified.status === "allowed" && !personaIdentity
+      ? socialReply(body.message.trim(), language, persona) : null;
     if (personaIdentity) {
       // Identity is public administrator data, never a visitor/model-authored role.
       verified = { reply: persona.greeting[language], status: "allowed" };
+    } else if (social) {
+      // Standalone greetings and short social turns need no fact retrieval.
+      // Safety classification ran first, and the server owns the response.
+      verified = { reply: social.reply, status: "allowed" };
     } else if (classified.status === "allowed") {
       const faqs = persona.id === DEFAULT_PERSONA_ID ? await getFaqBank() : persona.knowledge;
       const planningRecords = persona.id === DEFAULT_PERSONA_ID ? reviewedPlanningRecords(body.message, faqs) : [];
@@ -219,7 +226,8 @@ export async function POST(request) {
         ].slice(-12)
       });
     }
-    const answerMode = personaIdentity ? "persona_identity" : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq";
+    const answerMode = personaIdentity ? "persona_identity" : social ? "conversation_support"
+      : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq";
     const trust = buildTrustPassport({
       status, mode: answerMode, sources, personaVersion: persona.version, providerDegraded
     });
