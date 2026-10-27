@@ -36,3 +36,10 @@ test("bogus versions or huge reference lists do not create fabricated assurance"
   assert.equal(buildTrustPassport({status:"allowed",personaVersion:-1}).knowledgeVersion,null);
   assert.equal(buildTrustPassport({status:"allowed",sources:new Array(100)}).referenceCount,12);
 });
+
+test("social support receipts are based on the published profile, not fabricated evidence", () => {
+  const receipt=buildTrustPassport({status:"allowed",mode:"conversation_support",sources:[],personaVersion:1});
+  assert.equal(receipt.basis,"published_profile");
+  assert.equal(receipt.referenceCount,0);
+  assert.equal(receipt.liveChecked,false);
+});
