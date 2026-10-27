@@ -6,13 +6,13 @@ import { buildSafetyLabSnapshot, getSafetyLabSnapshot } from "../lib/safety-lab/
 
 const ADMIN = "550e8400-e29b-41d4-a716-446655440000";
 const OTHER = "550e8400-e29b-41d4-a716-446655440001";
-const ENV = ["NODE_ENV", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SERVICE_ROLE_KEY", "PERSONA_ADMIN_USER_IDS"];
+const ENV = ["NODE_ENV", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SERVICE_ROLE_KEY", "PERSONA_ADMIN_USER_IDS", "GITHUB_ACTIONS_READ_TOKEN"];
 function config(t, admin = ADMIN) {
   const before = Object.fromEntries(ENV.map((key) => [key, process.env[key]]));
   Object.assign(process.env, {
     NODE_ENV: "test", SUPABASE_URL: "https://safety-lab.invalid",
     SUPABASE_PUBLISHABLE_KEY: "public-fixture", SUPABASE_SERVICE_ROLE_KEY: "server-fixture",
-    PERSONA_ADMIN_USER_IDS: admin
+    PERSONA_ADMIN_USER_IDS: admin, GITHUB_ACTIONS_READ_TOKEN: ""
   });
   t.after(() => { for (const [key, value] of Object.entries(before)) {
     if (value === undefined) delete process.env[key]; else process.env[key] = value;
@@ -95,6 +95,7 @@ test("admin-read endpoint returns no-store, sanitized, historical-only summary",
   assert.equal(calls.length, 1);
   const body = await response.json();
   assert.equal(body.snapshot.cases, 500);
+  assert.equal(body.ci.state, "not_configured");
   assert.equal(body.snapshot.actualModelCalls, 0);
   assert.equal(body.snapshot.liveDeploymentTested, false);
   assert.equal(body.snapshot.releaseApproved, false);
@@ -115,4 +116,36 @@ test("safety lab navigation and privacy labels are present", async () => {
   assert.match(component, /api\/admin\/safety/);
   assert.match(component, /independent holdout/i);
   assert.doesNotMatch(component, /dangerouslySetInnerHTML/);
+});
+
+test("authenticated admin receives current CI metadata only after verifying identity",async(t)=>{
+  config(t);
+  process.env.GITHUB_ACTIONS_READ_TOKEN="fixture-token-for-read";
+  const calls=[];
+  t.mock.method(globalThis,"fetch",async(url,opts)=>{
+    calls.push(url);
+    if(new URL(url).hostname==="safety-lab.invalid") return Response.json({id:ADMIN});
+    assert.equal(new URL(url).hostname,"api.github.com");
+    assert.equal(opts.headers.Authorization,"Bearer fixture-token-for-read");
+    return Response.json({workflow_runs:[{
+      id:999,head_branch:"main",event:"push",head_sha:"f".repeat(40),
+      status:"completed",conclusion:"success",
+      created_at:"2026-10-27T12:00:00Z",updated_at:"2026-10-27T12:02:00Z"
+    }]});
+  });
+  const response=await GET(req());
+  assert.equal(response.status,200);
+  const result=await response.json();
+  assert.equal(result.ci.state,"available");
+  assert.equal(result.ci.latest.conclusion,"success");
+  assert.equal(result.ci.metricsFromLatestArtifact,false);
+  assert.equal(calls.length,2);
+});
+test("unauthorized visitors cannot trigger GitHub Actions metadata fetch",async(t)=>{
+  config(t);
+  process.env.GITHUB_ACTIONS_READ_TOKEN="fixture-token-for-read";
+  const calls=mockIdentity(t,OTHER);
+  const response=await GET(req());
+  assert.equal(response.status,403);
+  assert.equal(calls.length,1);
 });

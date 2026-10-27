@@ -35,7 +35,18 @@ const copy = {
     risk4: "Get a human release sign-off after checking false positives, source accuracy and incident response.",
     outputProbes: "Output contract probes", showMode: "Select evaluation mode",
     controlled: "Fixture contained", pass: "Known criteria passed",
-    warning: "Not production-certified"
+    warning: "Not production-certified",
+    currentCi: "Current CI", ciSub: "Latest push checks on the main branch · verified workflow metadata, not an LLM safety score.",
+    ciUnavailable: "Latest CI status could not be retrieved. The historical results below are still available.",
+    ciNotConfigured: "Connect CI: set a server-only GitHub Actions read token in Vercel to display the latest main-branch result.",
+    ciNoRuns: "No main-branch push runs were returned for the workflow.",
+    latest: "Latest run", lastCompleted: "Last completed", viewRun: "View CI run",
+    commit: "Commit", updated: "Recorded", deployed: "Deployment revision",
+    matches: "Matches the deployed revision", differs: "CI is for a different revision than this deployment",
+    unknownDeployment: "Deployment revision not available; cannot confirm release parity.",
+    ciCaveat: "CI validates automated tests and offline simulations. It does not call live DeepSeek, certify safety, or prove that this deployment is healthy.",
+    ciStatus: {completed: "Completed", in_progress: "Running", queued: "Queued", waiting: "Waiting", pending: "Pending", requested: "Requested", action_required: "Action required"},
+    ciResult: {success: "Passed", failure: "Failed", cancelled: "Cancelled", timed_out: "Timed out", neutral: "Neutral", skipped: "Skipped", action_required: "Action required", stale: "Stale"}
   },
   zh: {
     heading: "安全测试中心", subtitle: "中国旅游助手的离线安全回归测试记录。",
@@ -59,7 +70,18 @@ const copy = {
     risk4: "人工审核误拦截、资料准确性和事故响应计划后再批准发布。",
     outputProbes: "输出契约测试", showMode: "选择测试模式",
     controlled: "模拟拦截结果", pass: "已知条件通过",
-    warning: "尚未获得上线认证"
+    warning: "尚未获得上线认证",
+    currentCi: "最新持续集成检查", ciSub: "main 分支推送检查 · 仅展示真实工作流元数据，并非模型安全评分。",
+    ciUnavailable: "暂时无法获取最新 CI 状态。下方历史测试结果仍可查看。",
+    ciNotConfigured: "请在 Vercel 服务端配置 GitHub Actions 只读令牌以查看最新 main 分支运行状态。",
+    ciNoRuns: "未找到该工作流的 main 分支推送运行记录。",
+    latest: "最新运行", lastCompleted: "最近完成", viewRun: "查看 CI 运行",
+    commit: "代码版本", updated: "记录时间", deployed: "部署版本",
+    matches: "与当前部署版本一致", differs: "CI 检查版本与当前部署不同",
+    unknownDeployment: "未获取到部署版本，无法核验部署一致性。",
+    ciCaveat: "CI 只验证自动化测试及离线模拟；它不会调用真实 DeepSeek，也不能证明线上安全或部署健康。",
+    ciStatus: {completed: "已完成", in_progress: "运行中", queued: "排队中", waiting: "等待中", pending: "待处理", requested: "已请求", action_required: "需要操作"},
+    ciResult: {success: "通过", failure: "失败", cancelled: "已取消", timed_out: "超时", neutral: "中立", skipped: "已跳过", action_required: "需要操作", stale: "已过期"}
   }
 };
 
@@ -73,6 +95,7 @@ export default function SafetyLab() {
   const [access, setAccess] = useState("loading");
   const [attempt, setAttempt] = useState(0);
   const [snapshot, setSnapshot] = useState(null);
+  const [ci, setCi] = useState({state: "not_configured"});
   const [activeMode, setActiveMode] = useState("evidence-valid-id");
   const t = copy[language];
 
@@ -94,11 +117,11 @@ export default function SafetyLab() {
 
   useEffect(() => {
     if (!client || !session) {
-      setSnapshot(null); setAccess("loading");
+      setSnapshot(null); setCi({state: "not_configured"}); setAccess("loading");
       return undefined;
     }
     const controller = new AbortController();
-    setSnapshot(null); setAccess("loading");
+    setSnapshot(null); setCi({state: "not_configured"}); setAccess("loading");
     (async () => {
       const { data } = await client.auth.getSession();
       if (!data.session?.access_token) throw new Error("No valid session");
@@ -114,6 +137,9 @@ export default function SafetyLab() {
       const value = await response.json();
       if (!value.snapshot || value.snapshot.kind !== "historical_offline_regression_snapshot" ||
           !Array.isArray(value.snapshot.runs)) throw new Error("Invalid snapshot");
+      if (controller.signal.aborted) return;
+      setCi(value.ci && ["available", "not_configured", "unavailable", "no_runs"].includes(value.ci.state)
+        ? value.ci : {state: "unavailable"});
       setSnapshot(value.snapshot); setAccess("ready");
     })().catch(() => { if (!controller.signal.aborted) setAccess("error"); });
     return () => controller.abort();
@@ -121,7 +147,10 @@ export default function SafetyLab() {
 
   const chosen = snapshot?.runs.find((run) => run.mode === activeMode) || snapshot?.runs[0];
   const modeName = (mode) => modes[mode]?.[language === "zh" ? 1 : 0] || mode;
-  const signOut = async () => { setSnapshot(null); await client?.auth.signOut(); };
+  const signOut = async () => { setSnapshot(null); setCi({state: "not_configured"}); await client?.auth.signOut(); };
+  const ciOutcome = (run) => run?.status === "completed"
+    ? t.ciResult[run.conclusion] || "Unknown"
+    : t.ciStatus[run?.status] || "Unknown";
 
   return (
     <main className="admin-shell">
@@ -151,6 +180,25 @@ export default function SafetyLab() {
                 {access !== "loading" && <button className="primary-button" type="button" onClick={() => setAttempt((n) => n + 1)}>{t.retry}</button>}
               </section>
               : <>
+                <section className="admin-card lab-section" aria-labelledby="lab-current-ci-title">
+                  <div className="lab-title-row">
+                    <div><p className="section-kicker">GITHUB ACTIONS / MAIN</p><h2 id="lab-current-ci-title">{t.currentCi}</h2></div>
+                    {ci.state === "available" && <span className={"lab-run-state " + (ci.latest.conclusion === "success" ? "is-success" : ci.latest.conclusion === "failure" ? "is-failure" : "")}>{ciOutcome(ci.latest)}</span>}
+                  </div>
+                  <p className="lab-explanation">{t.ciSub}</p>
+                  {ci.state !== "available"
+                    ? <p className="lab-ci-unavailable" role="status">{ci.state === "not_configured" ? t.ciNotConfigured : ci.state === "no_runs" ? t.ciNoRuns : t.ciUnavailable}</p>
+                    : <>
+                      <div className="lab-ci-runs">
+                        <div><span>{t.latest}</span><strong>{ciOutcome(ci.latest)}</strong><p>{t.commit}: <code>{ci.latest.sha.slice(0, 12)}</code></p><p>{t.updated}: {ci.latest.createdAt}</p>
+                          <a className="lab-document-link" href={ci.latest.url} target="_blank" rel="noopener noreferrer">{t.viewRun}</a></div>
+                        {ci.lastCompleted && ci.lastCompleted.id !== ci.latest.id && <div><span>{t.lastCompleted}</span><strong>{ciOutcome(ci.lastCompleted)}</strong><p>{t.commit}: <code>{ci.lastCompleted.sha.slice(0, 12)}</code></p><p>{t.updated}: {ci.lastCompleted.createdAt}</p>
+                          <a className="lab-document-link" href={ci.lastCompleted.url} target="_blank" rel="noopener noreferrer">{t.viewRun}</a></div>}
+                      </div>
+                      <p className="lab-ci-revision">{t.deployed}: <code>{ci.deployedSha?.slice(0, 12) || "—"}</code>. {ci.matchesDeployment === true ? t.matches : ci.matchesDeployment === false ? t.differs : t.unknownDeployment}</p>
+                    </>}
+                  <p className="admin-smallprint">{t.ciCaveat}</p>
+                </section>
                 <section className="lab-context" aria-labelledby="lab-context-title">
                   <div>
                     <p className="section-kicker">{t.snapshot}</p>
