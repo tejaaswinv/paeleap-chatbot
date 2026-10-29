@@ -10,6 +10,7 @@ import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
 import { socialReply } from "../../../lib/ai/conversation-intents.js";
 import { scamPreventionReply } from "../../../lib/ai/scam-shield.js";
 import { resolveTravelFollowup } from "../../../lib/ai/followups.js";
+import { matchTravelTool, runTravelTool } from "../../../lib/ai/travel-tools.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
@@ -153,8 +154,10 @@ export async function POST(request) {
       ? socialReply(body.message.trim(), language, persona) : null;
     const scam = classified.status === "allowed" && !personaIdentity && !social
       ? scamPreventionReply(body.message.trim(), language) : null;
+    const quickToolId = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
+      !personaIdentity && !social && !scam ? matchTravelTool(body.message.trim()) : null;
     const followup = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
-      !personaIdentity && !social && !scam
+      !personaIdentity && !social && !scam && !quickToolId
       ? resolveTravelFollowup(body.message.trim(), history, language) : null;
     if (personaIdentity) {
       // Identity is public administrator data, never a visitor/model-authored role.
@@ -166,6 +169,21 @@ export async function POST(request) {
     } else if (scam) {
       // Static preventive guidance: never echo or "verify" user-provided links.
       verified = { reply: scam.reply, status: "allowed" };
+    } else if (quickToolId) {
+      const faqs = ["trip_brief", "vegetarian_card"].includes(quickToolId)
+        ? [] : await getFaqBank();
+      const tool = runTravelTool(quickToolId, { history, language, faqs });
+      if (tool) {
+        verified = { reply: tool.reply, status: tool.status };
+        generationUsed = true; // Only authored tool text and reviewed sources.
+        generationMode = tool.mode;
+        generationSources = tool.sources;
+      } else {
+        verified = { reply: language === "zh"
+          ? "当前旅行资料不足以生成此卡片，请查看官方参考资料。"
+          : "The reviewed travel bank cannot populate this tool yet. Please consult official references.", status: "redirected" };
+        responseReason = "unanswered";
+      }
     } else if (followup) {
       if (followup.kind === "clarification") {
         verified = { reply: followup.reply, status: "redirected" };
