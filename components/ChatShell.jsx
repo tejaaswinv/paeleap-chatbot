@@ -52,6 +52,8 @@ const text = {
     sourceTitle: "Reference links",
     receiptTitle: "Answer passport",
     receiptCurated: "Drawn from curated guide records, not independently checked live.",
+    receiptBrief: "Only explicitly named places and stated preferences in this trip's recent messages. No long-term profile or live booking information.",
+    receiptPrepared: "Fixed restaurant phrases prepared by TourMate. Ask staff to confirm ingredients; not a medical or allergy guarantee.",
     receiptProfile: "Identity supplied by the published museum assistant profile.",
     receiptSafety: "A safety response from TourMate's application rules; not a live verification of a website, merchant, or payment.",
     receiptUnanswered: "No supported reference answer was returned.",
@@ -69,6 +71,13 @@ const text = {
     profileTitle: "Assistant unavailable",
     profileVersion: "Profile version",
     today: "Current conversation",
+    quickTools: [
+      { key: "trip_brief", title: "Trip brief", prompt: "Show my TourMate trip brief" },
+      { key: "arrival_checklist", title: "Arrival checklist", prompt: "Show my China arrival checklist" },
+      { key: "vegetarian_card", title: "Food phrase card", prompt: "Show my vegetarian restaurant phrase card" },
+      { key: "reference_directory", title: "Reference guide", prompt: "Show TourMate official reference links" },
+      { key: "heritage_choice", title: "Heritage choice", prompt: "Show West Lake vs Grand Canal choice card" }
+    ],
     suggestions: [
       { title: "Getting around", body: "Book a train with your passport", prompt: "How do I book a train ticket in China?" },
       { title: "Pay with confidence", body: "Learn about visitor payments", prompt: "Can foreign tourists use Alipay?" },
@@ -110,6 +119,8 @@ const text = {
     sourceTitle: "参考资料链接",
     receiptTitle: "回答依据",
     receiptCurated: "内容来自经整理的导览资料，本次没有进行实时独立核查。",
+    receiptBrief: "仅整理本次行程最近消息中明确提到的地点及偏好，不使用长期个人资料或实时预订数据。",
+    receiptPrepared: "由 TourMate 提供的固定点餐短语，请向工作人员确认食材，不保证过敏原安全。",
     receiptProfile: "助手身份来自场馆管理员发布的配置。",
     receiptSafety: "此回复由 TourMate 应用安全规则生成，并未实时核验网站、商户或交易。",
     receiptUnanswered: "目前没有足够的已收录资料支持回答。",
@@ -127,6 +138,13 @@ const text = {
     profileTitle: "助手暂不可用",
     profileVersion: "配置版本",
     today: "当前对话",
+    quickTools: [
+      { key: "trip_brief", title: "旅途摘要", prompt: "查看我的旅途摘要" },
+      { key: "arrival_checklist", title: "入境清单", prompt: "查看中国入境准备清单" },
+      { key: "vegetarian_card", title: "素食沟通卡", prompt: "查看素食点餐沟通卡" },
+      { key: "reference_directory", title: "参考入口", prompt: "查看旅伴官方参考链接" },
+      { key: "heritage_choice", title: "景点对比", prompt: "查看西湖与大运河对比卡" }
+    ],
     suggestions: [
       { title: "轻松出行", body: "了解如何使用护照购买火车票", prompt: "在中国如何预订火车票？" },
       { title: "安心支付", body: "了解游客支付方式", prompt: "外国游客可以使用支付宝吗？" },
@@ -201,6 +219,8 @@ function Message({ message, language, copied, onCopy, avatar }) {
             <summary><Icon name="shield" size={14} />{t.receiptTitle}</summary>
             <div className="trust-passport-body">
               <p>{message.trust.basis === "curated_knowledge" ? t.receiptCurated
+                : message.trust.basis === "user_trip_context" ? t.receiptBrief
+                : message.trust.basis === "prepared_guidance" ? t.receiptPrepared
                 : message.trust.basis === "published_profile" ? t.receiptProfile
                 : message.trust.basis === "safety_notice" ? t.receiptSafety : t.receiptUnanswered}</p>
               <p>{t.receiptRefs}: {message.trust.referenceCount}</p>
@@ -659,6 +679,13 @@ export default function ChatShell() {
                       </button>
                     ))}
                   </div>
+                  {persona?.id === DEFAULT_PERSONA_ID && (
+                    <div className="tool-strip" aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
+                      {t.quickTools.filter(tool => tool.key !== "trip_brief").map(tool => (
+                        <button type="button" key={tool.key} onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="message-list" aria-live="polite">
@@ -675,6 +702,14 @@ export default function ChatShell() {
             </section>
 
             <div className="composer-area">
+              {persona?.id === DEFAULT_PERSONA_ID && messages.length > 0 && (
+                <nav className="tool-strip tool-strip-compact" aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
+                  {t.quickTools.map(tool => (
+                    <button type="button" key={tool.key} disabled={!personaReady || pending || historyUnavailable}
+                      onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
+                  ))}
+                </nav>
+              )}
               {history.storageFailed && <p className="history-notice" role="status">{t.storageError}</p>}
               {history.syncFailed && <div className="history-notice" role="status">{t.syncError} <button type="button" onClick={history.retrySync}>{t.retry}</button></div>}
               {error && (

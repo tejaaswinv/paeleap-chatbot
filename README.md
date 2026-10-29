@@ -184,3 +184,16 @@ TourMate provides fixed bilingual cautionary guidance for **specific suspicious*
 
 ## Bounded conversational follow-ups (v1)
 TourMate recognizes a small set of **short, explicit** English/Chinese follow-ups about entry prices, opening hours, advance reservations, wheelchair accessibility and getting to a place. Only a single named attraction from up to four recent **safe, same-conversation user turns** can supply context; assistant prose and other conversations are never treated as authoritative context. Examples: `Tell me about West Lake` → `What about the price?` returns the exact approved **general** ticket-price FAQ (not a real-time West Lake quote); `How do I get there?` asks for the departure point rather than inventing a route. Ambiguous/no-context messages ask for the place. Custom museum personas, ScamShield, emergency/blocking rules, and ordinary direct questions follow their existing flows. The new `contextual_faq` mode is explicitly marked “Follow-up · General reference,” with no live-verification claim. No new model calls or database migrations are required. Tests: `node --test tests/followups.test.mjs` plus the existing strict 500-case regression.
+ 
+
+## Five TourMate travel quick tools
+
+Default TourMate now offers five opt-in, bilingual, keyboard-accessible quick actions both from the welcome view and during active trips (Trip Brief is available after a message has been sent). Custom museum personas are unchanged.
+
+1. **Trip Brief** – summaries of public place names and explicitly self-described travel preferences from recent **same-conversation user turns**. Assistant text, other trips, raw identity data and long-term memory are never used.
+2. **China Arrival Checklist** – three existing canonical FAQ answers about preparations, visas and landing, with their existing sources. No visa eligibility claim.
+3. **Vegetarian Food Phrase Card** – fixed Chinese/English phrases to ask restaurant staff about meat, fish, seafood and broth. Not an allergy guarantee.
+4. **Reference Directory** – curated government, railway and UNESCO links already present in the FAQ bank; only six allowlisted URLs are included, and none are fetched or checked live.
+5. **Heritage Choice Card** – existing approved comparison of West Lake and Grand Canal plus a gentle Hangzhou day. No live schedules or invented rankings.
+
+Tool commands match only standalone phrases. Each call retains server-side safety checks, Supabase authentication, quotas, canonical FAQ integrity, optional source links and appropriate provenance. Trip Brief and phrase cards have distinct Trust Passport bases to avoid presenting them as validated external evidence. The repo includes unit, contract and route tests. No migrations, model charges or new credentials are required.
