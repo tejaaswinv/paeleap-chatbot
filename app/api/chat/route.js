@@ -9,6 +9,7 @@ import { aiFailureCode } from "../../../lib/ai/diagnostics.js";
 import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
 import { socialReply } from "../../../lib/ai/conversation-intents.js";
 import { scamPreventionReply } from "../../../lib/ai/scam-shield.js";
+import { resolveTravelFollowup } from "../../../lib/ai/followups.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
@@ -152,6 +153,9 @@ export async function POST(request) {
       ? socialReply(body.message.trim(), language, persona) : null;
     const scam = classified.status === "allowed" && !personaIdentity && !social
       ? scamPreventionReply(body.message.trim(), language) : null;
+    const followup = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
+      !personaIdentity && !social && !scam
+      ? resolveTravelFollowup(body.message.trim(), history, language) : null;
     if (personaIdentity) {
       // Identity is public administrator data, never a visitor/model-authored role.
       verified = { reply: persona.greeting[language], status: "allowed" };
@@ -162,6 +166,25 @@ export async function POST(request) {
     } else if (scam) {
       // Static preventive guidance: never echo or "verify" user-provided links.
       verified = { reply: scam.reply, status: "allowed" };
+    } else if (followup) {
+      if (followup.kind === "clarification") {
+        verified = { reply: followup.reply, status: "redirected" };
+        responseReason = followup.reason;
+      } else {
+        // The follow-up's subject was read only from a recent safe USER turn;
+        // the answer remains the exact, reviewed GENERAL FAQ, not a fabricated
+        // place-specific price, opening time, reservation or access guarantee.
+        const faqs = await getFaqBank();
+        faq = faqs.find(row => row.question_en === followup.question) || null;
+        if (faq) {
+          verified = validateOutput(faq[language === "zh" ? "answer_zh" : "answer_en"], language);
+        } else {
+          verified = { reply: language === "zh"
+            ? "现有资料无法可靠回答这个后续问题，请通过景点官方渠道核实。"
+            : "The reviewed travel notes cannot reliably answer this follow-up. Please verify with the attraction's official channel.", status: "redirected" };
+          responseReason = "unanswered";
+        }
+      }
     } else if (classified.status === "allowed") {
       const faqs = persona.id === DEFAULT_PERSONA_ID ? await getFaqBank() : persona.knowledge;
       const planningRecords = persona.id === DEFAULT_PERSONA_ID ? reviewedPlanningRecords(body.message, faqs) : [];
@@ -233,7 +256,8 @@ export async function POST(request) {
       });
     }
     const answerMode = personaIdentity ? "persona_identity" : social ? "conversation_support"
-      : scam ? "scam_prevention" : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq";
+      : scam ? "scam_prevention" : followup?.kind === "reviewed_faq" && faq ? "contextual_faq"
+      : generationUsed ? generationMode : providerDegraded ? "curated_faq_fallback" : "curated_faq";
     const trust = buildTrustPassport({
       status, mode: answerMode, sources, personaVersion: persona.version, providerDegraded
     });
