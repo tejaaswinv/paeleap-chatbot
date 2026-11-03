@@ -272,7 +272,8 @@ test("503 retry never changes model or minimal Responses payload", async () => {
     }
   });
   assert.deepEqual(payloads,[payloads[0],payloads[0]]);
-  assert.deepEqual(Object.keys(payloads[0]).sort(),["input","model","stream"]);
+  assert.deepEqual(Object.keys(payloads[0]).sort(),["input","model","reasoning","stream"]);
+  assert.deepEqual(payloads[0].reasoning, {effort:"none"});
 });
 
 test("bounded inference disables default DeepSeek reasoning and preserves output cap", async () => {
