@@ -44,7 +44,10 @@ test("structured diagnostics distinguish invalid evidence from network errors", 
     ["Unsupported AI_API_STYLE", "PROVIDER_CONFIG_INVALID"],
     ["AI_BASE_URL must end with /v1 or a supported API path", "PROVIDER_CONFIG_INVALID"],
     ["Empty or invalid AI provider response: length", "UPSTREAM_OUTPUT_TRUNCATED"],
-    ["Empty or invalid AI provider response: incomplete", "UPSTREAM_RESPONSE_INCOMPLETE"]
+    ["Empty or invalid AI provider response: incomplete", "UPSTREAM_RESPONSE_INCOMPLETE"],
+    ["Empty or invalid AI provider response: max_output_tokens", "UPSTREAM_OUTPUT_TOKEN_LIMIT"],
+    ["Empty or invalid AI provider response: content_filter", "UPSTREAM_CONTENT_FILTER"],
+    ["Empty or invalid AI provider response: failed", "UPSTREAM_RESPONSE_FAILED"]
   ];
   for (const [message, expected] of cases) assert.equal(aiFailureCode(new Error(message)), expected);
 });

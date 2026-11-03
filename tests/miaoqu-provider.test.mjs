@@ -272,5 +272,81 @@ test("503 retry never changes model or minimal Responses payload", async () => {
     }
   });
   assert.deepEqual(payloads,[payloads[0],payloads[0]]);
-  assert.deepEqual(Object.keys(payloads[0]).sort(),["input","model","stream"]);
+  assert.deepEqual(Object.keys(payloads[0]).sort(),["input","model","reasoning","stream"]);
+  assert.deepEqual(payloads[0].reasoning, {effort:"none"});
+});
+
+test("bounded inference disables default DeepSeek reasoning and preserves output cap", async () => {
+  let calls = 0;
+  const result = await requestResponsesFaqSelection({
+    ...responsesArgs, minimalFirst: true, outputTokenLimit: 512,
+    fetchImpl: async (_url, init) => {
+      calls++;
+      const payload = JSON.parse(init.body);
+      assert.deepEqual(payload.reasoning, { effort: "none" });
+      assert.equal(payload.max_output_tokens, 512);
+      assert.equal(payload.store, false);
+      return responsesOk();
+    }
+  });
+  assert.equal(calls, 1);
+  assert.equal(parseFaqSelection(result, [{ id: "CN061" }]).faqId, "CN061");
+});
+
+test("explicit reasoning parameter rejection allows one bounded compatibility fallback", async () => {
+  const bodies = [];
+  const result = await requestResponsesFaqSelection({
+    ...responsesArgs, minimalFirst: true, outputTokenLimit: 512,
+    fetchImpl: async (_url, init) => {
+      bodies.push(JSON.parse(init.body));
+      return bodies.length === 1
+        ? Response.json({ error: { message: "Unsupported parameter reasoning.effort" } }, { status: 400 })
+        : responsesOk();
+    }
+  });
+  assert.equal(bodies.length, 2);
+  assert.equal(bodies[0].reasoning.effort, "none");
+  assert.equal("reasoning" in bodies[1], false);
+  assert.equal(bodies[1].max_output_tokens, 512);
+  assert.equal(bodies[1].store, false);
+  assert.equal(parseFaqSelection(result, [{ id: "CN061" }]).faqId, "CN061");
+});
+
+test("incomplete token exhaustion is logged safely and never accepted as a valid answer", async (t) => {
+  const warnings = [];
+  t.mock.method(console, "warn", (...args) => warnings.push(args));
+  const secret = "do-not-leak-the-key";
+  let calls = 0;
+  const error = await requestResponsesFaqSelection({
+    ...responsesArgs, key: secret, minimalFirst: true, outputTokenLimit: 512,
+    fetchImpl: async () => {
+      calls++;
+      return Response.json({
+        status: "incomplete",
+        incomplete_details: { reason: "max_output_tokens" },
+        usage: { output_tokens_details: { reasoning_tokens: 512 } },
+        output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: secret }] }]
+      });
+    }
+  }).then(() => null, error => error);
+  assert.match(error.message, /max_output_tokens/);
+  assert.equal(calls, 1);
+  assert.ok(warnings.some(args => args[0] === "AI provider response incomplete" &&
+    args[1].reason === "max_output_tokens" && args[1].reasoningTokensUsed === 512));
+  assert.doesNotMatch(JSON.stringify(warnings), new RegExp(secret));
+});
+
+test("incomplete content filtering never retries, even when partial text exists", async () => {
+  let calls = 0;
+  await assert.rejects(requestResponsesFaqSelection({
+    ...responsesArgs, minimalFirst: true, outputTokenLimit: 512,
+    fetchImpl: async () => {
+      calls++;
+      return Response.json({
+        status: "incomplete", incomplete_details: { reason: "content_filter" },
+        output: [{type: "message", role: "assistant", content: [{type: "output_text", text: "unsafe incomplete"}]}]
+      });
+    }
+  }), /content_filter/);
+  assert.equal(calls, 1);
 });

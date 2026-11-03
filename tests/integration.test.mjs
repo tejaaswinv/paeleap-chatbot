@@ -64,8 +64,9 @@ function services(t, options = {}) {
     if (url.hostname === "provider.example.test") {
       assert.equal(url.pathname, "/v1/responses");
       assert.ok(Array.isArray(body.input));
-      assert.deepEqual(Object.keys(body).sort(), ["input", "max_output_tokens", "model", "store", "stream"]);
+      assert.deepEqual(Object.keys(body).sort(), ["input", "max_output_tokens", "model", "reasoning", "store", "stream"]);
       assert.equal(body.stream, false);
+      assert.deepEqual(body.reasoning, { effort: "none" });
       assert.equal(headers.get("Authorization"), "Bearer test-provider-key");
       if (options.providerFailure) return Response.json({}, { status: 500 });
       return Response.json({ status: "completed", output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: options.reply || '{"faqId":"CN061","confidence":0.98}' }] }] });
@@ -172,7 +173,7 @@ test("AI selects an ID but only its exact stored answer reaches the client and h
   assert.match(provider.body.input[0].content, /CN061/);
   assert.doesNotMatch(provider.body.input[0].content, /CN100/);
   assert.equal(provider.body.model, "test-model");
-  assert.deepEqual(Object.keys(provider.body).sort(), ["input", "max_output_tokens", "model", "store", "stream"]);
+  assert.deepEqual(Object.keys(provider.body).sort(), ["input", "max_output_tokens", "model", "reasoning", "store", "stream"]);
   assert.equal(provider.body.stream, false);
 });
 
@@ -286,7 +287,7 @@ test("opt-in grounded mode composes only approved evidence, never model prose", 
   assert.equal(data.faq, undefined);
   const providerCalls = calls.filter(call => call.url.hostname === "provider.example.test");
   assert.equal(providerCalls.length, 1);
-  assert.deepEqual(Object.keys(providerCalls[0].body).sort(), ["input", "max_output_tokens", "model", "store", "stream"]);
+  assert.deepEqual(Object.keys(providerCalls[0].body).sort(), ["input", "max_output_tokens", "model", "reasoning", "store", "stream"]);
 });
 
 test("grounded mode provider outage falls back without a second failed AI call", async (t) => {
