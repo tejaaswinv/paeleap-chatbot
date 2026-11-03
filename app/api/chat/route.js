@@ -10,6 +10,7 @@ import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
 import { socialReply } from "../../../lib/ai/conversation-intents.js";
 import { scamPreventionReply } from "../../../lib/ai/scam-shield.js";
 import { resolveTravelFollowup } from "../../../lib/ai/followups.js";
+import { resolveConfirmation } from "../../../lib/ai/confirmations.js";
 import { matchTravelTool, runTravelTool } from "../../../lib/ai/travel-tools.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
@@ -158,7 +159,7 @@ export async function POST(request) {
       !personaIdentity && !social && !scam ? matchTravelTool(body.message.trim()) : null;
     const followup = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
       !personaIdentity && !social && !scam && !quickToolId
-      ? resolveTravelFollowup(body.message.trim(), history, language) : null;
+      ? (resolveConfirmation(body.message.trim(), history, language) || resolveTravelFollowup(body.message.trim(), history, language)) : null;
     if (personaIdentity) {
       // Identity is public administrator data, never a visitor/model-authored role.
       verified = { reply: persona.greeting[language], status: "allowed" };
@@ -226,7 +227,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI generation degraded; using curated FAQ fallback", {
-            kind: /AI provider returned HTTP/.test(error?.message || "") ? "upstream_http" : "upstream_format_or_network"
+            stage: "evidence_selection", code: providerErrorCode
           });
         }
       }
@@ -241,7 +242,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI matching degraded; using curated FAQ fallback", {
-            kind: /AI provider returned HTTP/.test(error?.message || "") ? "upstream_http" : "upstream_format_or_network"
+            stage: "faq_selection", code: providerErrorCode
           });
           selection = matchFaqOffline(body.message.trim(), faqs, sanitizeFaqHistory(history), { allowReviewedTopics: persona.id !== DEFAULT_PERSONA_ID });
         }
