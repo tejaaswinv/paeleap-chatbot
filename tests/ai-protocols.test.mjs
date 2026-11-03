@@ -82,3 +82,41 @@ test("model error or malformed provider response is never interpreted as an answ
   await assert.rejects(requestModelText({baseUrl,key,model:"claude",protocol:"anthropic",messages,
     fetchImpl:async()=>new Response("<html>Error</html>",{status:200,headers:{"content-type":"text/html"}})}),/invalid AI provider response/);
 });
+
+test("DeepSeek Chat Completions disables thinking and keeps bounded evidence output", async () => {
+  let n=0;
+  const text=await requestModelText({
+    baseUrl,key,model:"deepseek-v4-pro-ga-260813",protocol:"chat_completions",
+    messages,outputTokenLimit:512,fetchImpl:async (url,init)=>{
+      n++;
+      assert.equal(url,baseUrl+"/chat/completions");
+      const body=JSON.parse(init.body);
+      assert.deepEqual(body,{
+        model:"deepseek-v4-pro-ga-260813",messages,stream:false,
+        thinking:{type:"disabled"},max_tokens:512
+      });
+      assert.equal(init.headers.Authorization,"Bearer "+key);
+      return Response.json({choices:[{finish_reason:"stop",message:{
+        role:"assistant",content:'{"decision":"answer","recordIds":["CN061"]}'
+      }}]});
+    }
+  });
+  assert.equal(n,1);
+  assert.equal(text,'{"decision":"answer","recordIds":["CN061"]}');
+});
+
+test("DeepSeek Chat Completions fails closed on truncated output and never retries it",async()=>{
+  let n=0;
+  await assert.rejects(requestModelText({
+    baseUrl,key,model:"deepseek-v4-pro-ga-260813",protocol:"chat_completions",
+    messages,outputTokenLimit:512,fetchImpl:async (_url,init)=>{
+      n++;
+      assert.deepEqual(JSON.parse(init.body).thinking,{type:"disabled"});
+      return Response.json({choices:[{finish_reason:"length",message:{
+        content:'{"decision":"answer","recordIds":["CN061"]}',
+        reasoning_content:"secret-not-an-answer"
+      }}]});
+    }
+  }),/invalid AI provider response: length/);
+  assert.equal(n,1);
+});
