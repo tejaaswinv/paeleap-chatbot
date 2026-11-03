@@ -13,6 +13,7 @@ import { resolveTravelFollowup } from "../../../lib/ai/followups.js";
 import { resolveConfirmation } from "../../../lib/ai/confirmations.js";
 import { matchTravelTool, runTravelTool } from "../../../lib/ai/travel-tools.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
+import { reviewedBeijingItinerary } from "../../../lib/tourism/reviewed-itinerary.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
 export const runtime = "nodejs";
@@ -157,6 +158,9 @@ export async function POST(request) {
       ? scamPreventionReply(body.message.trim(), language) : null;
     const quickToolId = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
       !personaIdentity && !social && !scam ? matchTravelTool(body.message.trim()) : null;
+    const itinerary = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
+      !personaIdentity && !social && !scam && !quickToolId
+      ? reviewedBeijingItinerary(body.message.trim(), language) : null;
     const followup = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
       !personaIdentity && !social && !scam && !quickToolId
       ? (resolveConfirmation(body.message.trim(), history, language) || resolveTravelFollowup(body.message.trim(), history, language)) : null;
@@ -185,6 +189,14 @@ export async function POST(request) {
           : "The reviewed travel bank cannot populate this tool yet. Please consult official references.", status: "redirected" };
         responseReason = "unanswered";
       }
+    } else if (itinerary) {
+      // Reviewed destination plans run before FAQ-only matching. A broad,
+      // legitimate multi-day request should not require one exact FAQ record
+      // or spend a paid inference call just to return an unsupported redirect.
+      verified = { reply: itinerary.reply, status: itinerary.status };
+      generationUsed = true;
+      generationMode = itinerary.mode;
+      generationSources = itinerary.sources;
     } else if (followup) {
       if (followup.kind === "clarification") {
         verified = { reply: followup.reply, status: "redirected" };
