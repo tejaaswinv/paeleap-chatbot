@@ -227,7 +227,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI generation degraded; using curated FAQ fallback", {
-            code: providerErrorCode
+            stage: "evidence_selection", code: providerErrorCode
           });
         }
       }
@@ -242,7 +242,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI matching degraded; using curated FAQ fallback", {
-            kind: /AI provider returned HTTP/.test(error?.message || "") ? "upstream_http" : "upstream_format_or_network"
+            stage: "faq_selection", code: providerErrorCode
           });
           selection = matchFaqOffline(body.message.trim(), faqs, sanitizeFaqHistory(history), { allowReviewedTopics: persona.id !== DEFAULT_PERSONA_ID });
         }
