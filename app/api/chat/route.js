@@ -13,7 +13,7 @@ import { resolveTravelFollowup } from "../../../lib/ai/followups.js";
 import { resolveConfirmation } from "../../../lib/ai/confirmations.js";
 import { matchTravelTool, runTravelTool } from "../../../lib/ai/travel-tools.js";
 import { reviewedPlanningRecords } from "../../../lib/tourism/evidence-fallback.js";
-import { reviewedBeijingItinerary } from "../../../lib/tourism/reviewed-itinerary.js";
+import { generateTourismReply } from "../../../lib/ai/tourism-generation.js";
 import { DEFAULT_PERSONA_ID, publicPersona, resolvePersona, personaKnowledge } from "../../../lib/personas/index.js";
 
 export const runtime = "nodejs";
@@ -150,19 +150,18 @@ export async function POST(request) {
     let generationSources = [];
     let verified = { reply: classified.reply, status: classified.status };
     let responseReason = classified.status === "redirected" ? "out_of_scope" : null;
+    const generativeTourMate = persona.id === DEFAULT_PERSONA_ID && !demo && !mockAiEnabled() &&
+      process.env.AI_CHAT_MODE === "generative";
     const identityQuestion = /^(?:who are you|what is your name|你是谁|你是誰|你叫什么名字|你叫什麼名字)[?？!！。\s]*$/i.test(body.message.trim());
     const personaIdentity = classified.status === "allowed" && persona.id !== DEFAULT_PERSONA_ID && identityQuestion;
-    const social = classified.status === "allowed" && !personaIdentity
+    const social = classified.status === "allowed" && !personaIdentity && !generativeTourMate
       ? socialReply(body.message.trim(), language, persona) : null;
     const scam = classified.status === "allowed" && !personaIdentity && !social
       ? scamPreventionReply(body.message.trim(), language) : null;
     const quickToolId = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
       !personaIdentity && !social && !scam ? matchTravelTool(body.message.trim()) : null;
-    const itinerary = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
-      !personaIdentity && !social && !scam && !quickToolId
-      ? reviewedBeijingItinerary(body.message.trim(), language) : null;
     const followup = classified.status === "allowed" && persona.id === DEFAULT_PERSONA_ID &&
-      !personaIdentity && !social && !scam && !quickToolId
+      !personaIdentity && !social && !scam && !quickToolId && !generativeTourMate
       ? (resolveConfirmation(body.message.trim(), history, language) || resolveTravelFollowup(body.message.trim(), history, language)) : null;
     if (personaIdentity) {
       // Identity is public administrator data, never a visitor/model-authored role.
@@ -189,14 +188,6 @@ export async function POST(request) {
           : "The reviewed travel bank cannot populate this tool yet. Please consult official references.", status: "redirected" };
         responseReason = "unanswered";
       }
-    } else if (itinerary) {
-      // Reviewed destination plans run before FAQ-only matching. A broad,
-      // legitimate multi-day request should not require one exact FAQ record
-      // or spend a paid inference call just to return an unsupported redirect.
-      verified = { reply: itinerary.reply, status: itinerary.status };
-      generationUsed = true;
-      generationMode = itinerary.mode;
-      generationSources = itinerary.sources;
     } else if (followup) {
       if (followup.kind === "clarification") {
         verified = { reply: followup.reply, status: "redirected" };
@@ -219,16 +210,18 @@ export async function POST(request) {
     } else if (classified.status === "allowed") {
       const faqs = persona.id === DEFAULT_PERSONA_ID ? await getFaqBank() : persona.knowledge;
       const planningRecords = persona.id === DEFAULT_PERSONA_ID ? reviewedPlanningRecords(body.message, faqs) : [];
-      if (planningRecords.length) {
+      if (!generativeTourMate && planningRecords.length) {
         verified = { reply: renderEvidenceReply(planningRecords, language, persona), status: "allowed" };
         generationUsed = true;
         generationMode = "curated_evidence";
         generationSources = [...new Map(planningRecords.flatMap(record => record.sources || []).map(source => [source.url, source])).values()];
       }
-      const groundedMode = (process.env.AI_RESPONSE_MODE === "grounded" || persona.id !== DEFAULT_PERSONA_ID) && !demo && !mockAiEnabled();
+      const groundedMode = (generativeTourMate || process.env.AI_RESPONSE_MODE === "grounded" || persona.id !== DEFAULT_PERSONA_ID) && !demo && !mockAiEnabled();
       if (groundedMode && !generationUsed) {
         try {
-          const generated = await generateGroundedReply({ message: body.message.trim(), language, history, faqs, persona });
+          const generated = generativeTourMate
+            ? await generateTourismReply({ message: body.message.trim(), language, history, faqs })
+            : await generateGroundedReply({ message: body.message.trim(), language, history, faqs, persona });
           verified = { reply: generated.reply, status: generated.status };
           generationSources = generated.sources;
           generationUsed = true;
@@ -239,7 +232,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI generation degraded; using curated FAQ fallback", {
-            stage: "evidence_selection", code: providerErrorCode
+            stage: generativeTourMate ? "tourism_generation" : "evidence_selection", code: providerErrorCode
           });
         }
       }
