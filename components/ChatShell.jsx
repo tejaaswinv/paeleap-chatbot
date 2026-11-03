@@ -50,7 +50,7 @@ const text = {
     stop: "Stop response",
     enterHint: "Enter to send · Shift + Enter for a new line",
     sourceTitle: "Reference links",
-    receiptTitle: "Answer passport",
+    receiptTitle: "Answer sources & limits",
     receiptCurated: "Drawn from curated guide records, not independently checked live.",
     receiptBrief: "Only explicitly named places and stated preferences in this trip's recent messages. No long-term profile or live booking information.",
     receiptPrepared: "Fixed restaurant phrases prepared by TourMate. Ask staff to confirm ingredients; not a medical or allergy guarantee.",
