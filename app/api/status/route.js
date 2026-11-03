@@ -19,6 +19,7 @@ export async function GET() {
     localDemoMode: localDemo,
     aiMockMode: mockAiEnabled(),
     aiResponseMode,
+    aiChatMode: process.env.AI_CHAT_MODE === "generative" && !localDemo ? "generative" : "faq_selector",
     aiApiStyle: ["responses", "chat_completions", "anthropic"].includes(process.env.AI_API_STYLE) ? process.env.AI_API_STYLE : process.env.AI_API_STYLE ? "invalid" : "responses",
     // Configuration only, not a database/provider health check.
     faqBank: { source: process.env.FAQ_BANK_SOURCE || (process.env.NODE_ENV === "production" ? "supabase" : "local"), expectedCount: 100,

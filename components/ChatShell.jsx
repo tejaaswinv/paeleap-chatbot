@@ -52,6 +52,7 @@ const text = {
     sourceTitle: "Reference links",
     receiptTitle: "Answer sources & limits",
     receiptCurated: "Drawn from curated guide records, not independently checked live.",
+    receiptAI: "Written by AI using general travel knowledge and any relevant guide context. Not independently fact-checked; verify changing details with official providers.",
     receiptBrief: "Only explicitly named places and stated preferences in this trip's recent messages. No long-term profile or live booking information.",
     receiptPrepared: "Fixed restaurant phrases prepared by TourMate. Ask staff to confirm ingredients; not a medical or allergy guarantee.",
     receiptProfile: "Identity supplied by the published museum assistant profile.",
@@ -119,6 +120,7 @@ const text = {
     sourceTitle: "参考资料链接",
     receiptTitle: "回答依据",
     receiptCurated: "内容来自经整理的导览资料，本次没有进行实时独立核查。",
+    receiptAI: "由 AI 根据通用旅游知识及相关参考资料生成，未实时核实。请通过官方渠道确认可能变化的信息。",
     receiptBrief: "仅整理本次行程最近消息中明确提到的地点及偏好，不使用长期个人资料或实时预订数据。",
     receiptPrepared: "由 TourMate 提供的固定点餐短语，请向工作人员确认食材，不保证过敏原安全。",
     receiptProfile: "助手身份来自场馆管理员发布的配置。",
@@ -218,7 +220,8 @@ function Message({ message, language, copied, onCopy, avatar }) {
           <details className="trust-passport">
             <summary><Icon name="shield" size={14} />{t.receiptTitle}</summary>
             <div className="trust-passport-body">
-              <p>{message.trust.basis === "curated_knowledge" ? t.receiptCurated
+              <p>{message.trust.basis === "ai_generated" ? t.receiptAI
+                : message.trust.basis === "curated_knowledge" ? t.receiptCurated
                 : message.trust.basis === "user_trip_context" ? t.receiptBrief
                 : message.trust.basis === "prepared_guidance" ? t.receiptPrepared
                 : message.trust.basis === "published_profile" ? t.receiptProfile
