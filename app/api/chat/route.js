@@ -227,7 +227,7 @@ export async function POST(request) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
           console.warn("AI generation degraded; using curated FAQ fallback", {
-            kind: /AI provider returned HTTP/.test(error?.message || "") ? "upstream_http" : "upstream_format_or_network"
+            code: providerErrorCode
           });
         }
       }
