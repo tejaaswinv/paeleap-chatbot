@@ -20,7 +20,7 @@ test("minimal Sub2API request has only model/input/stream and no unsupported opt
     fetchImpl:async(url,init)=>{
       calls++;
       assert.equal(url,"https://api.miaoquai.com/v1/responses");
-      assert.deepEqual(JSON.parse(init.body),{model:"deepseek-v4-pro",input:messages,stream:false});
+      assert.deepEqual(JSON.parse(init.body),{model:"deepseek-v4-pro",input:messages,stream:false,reasoning:{effort:"none"}});
       return answer('{"faqId":"CN061","confidence":0.98}');
     }});
   assert.equal(calls,1);
@@ -34,7 +34,8 @@ test("evidence composition uses Responses API with source-backed reference snipp
     fetchImpl:async(url,init)=>{
       called++;assert.equal(url,"https://api.miaoquai.com/v1/responses");
       const body=JSON.parse(init.body);
-      assert.deepEqual(Object.keys(body).sort(),["input","max_output_tokens","model","store","stream"]);
+      assert.deepEqual(Object.keys(body).sort(),["input","max_output_tokens","model","reasoning","store","stream"]);
+      assert.deepEqual(body.reasoning,{effort:"none"});
       assert.equal(body.max_output_tokens,512);
       assert.equal(body.store,false);
       assert.match(body.input[0].content,/TourMate/);
