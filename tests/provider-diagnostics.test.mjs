@@ -34,3 +34,34 @@ test("grounded mode uses SUB2API_API_KEY from Codex config when configured",asyn
   assert.equal(calls,1);
   assert.equal(result.mode,"evidence_composition");
 });
+
+test("structured diagnostics distinguish invalid evidence from network errors", () => {
+  const cases = [
+    ["Invalid evidence plan", "INVALID_EVIDENCE_PLAN"],
+    ["Unknown evidence record", "UNKNOWN_EVIDENCE_RECORD"],
+    ["Invalid approved evidence", "INVALID_APPROVED_EVIDENCE"],
+    ["Invalid published persona", "INVALID_PUBLISHED_PERSONA"],
+    ["Unsupported AI_API_STYLE", "PROVIDER_CONFIG_INVALID"],
+    ["AI_BASE_URL must end with /v1 or a supported API path", "PROVIDER_CONFIG_INVALID"],
+    ["Empty or invalid AI provider response: length", "UPSTREAM_OUTPUT_TRUNCATED"],
+    ["Empty or invalid AI provider response: incomplete", "UPSTREAM_RESPONSE_INCOMPLETE"]
+  ];
+  for (const [message, expected] of cases) assert.equal(aiFailureCode(new Error(message)), expected);
+});
+test("transport diagnostics never leak arbitrary cause messages or secrets", () => {
+  const kinds = [
+    ["ENOTFOUND", "UPSTREAM_DNS_ERROR"],
+    ["UND_ERR_CONNECT_TIMEOUT", "UPSTREAM_TIMEOUT"],
+    ["ECONNRESET", "UPSTREAM_CONNECTION_RESET"],
+    ["ECONNREFUSED", "UPSTREAM_CONNECT_FAILED"],
+    ["CERT_HAS_EXPIRED", "UPSTREAM_TLS_ERROR"]
+  ];
+  for (const [code, expected] of kinds) {
+    const error = Object.assign(new Error("secret-key-should-not-show"), {
+      cause: Object.assign(new Error("secret-key-should-not-show"), { code })
+    });
+    const result = aiFailureCode(error);
+    assert.equal(result, expected);
+    assert.doesNotMatch(result, /secret/);
+  }
+});
