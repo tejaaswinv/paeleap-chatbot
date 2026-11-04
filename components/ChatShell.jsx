@@ -5,6 +5,7 @@ import AuthPanel from "./AuthPanel.jsx";
 import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
 import { localHistoryForRequest } from "../lib/client/trips.js";
+import { travelRefinementActions, downloadableTravelPlan, formatTravelPlanDownload } from "../lib/client/travel-actions.js";
 import { DEFAULT_PERSONA_ID, parsePublicPersona, personaIdFromSearch, provenanceLabel } from "../lib/client/personas.js";
 import {
   MAX_MESSAGE_LENGTH,
@@ -166,6 +167,7 @@ function Icon({ name, size = 20 }) {
   if (name === "link") return <svg {...common}><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" /></svg>;
   if (name === "spark") return <svg {...common}><path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3Z" /><path d="m19 15 .7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15Z" /></svg>;
   if (name === "stop") return <svg {...common}><rect x="6" y="6" width="12" height="12" rx="2" /></svg>;
+  if (name === "download") return <svg {...common}><path d="M12 3v12m-4-4 4 4 4-4" /><path d="M5 17v3h14v-3" /></svg>;
   if (name === "logout") return <svg {...common}><path d="M10 17l5-5-5-5M15 12H3" /><path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" /></svg>;
   return null;
 }
@@ -363,6 +365,8 @@ export default function ChatShell() {
   const history = useTripHistory(chatIdentity, authClient, personaId || DEFAULT_PERSONA_ID);
   const { trips, activeTrip } = history;
   const messages = activeTrip?.messages || [];
+  const refinementActions = travelRefinementActions(messages, language);
+  const exportablePlan = downloadableTravelPlan(messages);
   const draft = activeTrip?.draft || "";
   const error = activeTrip?.error || "";
   const pending = activeTrip?.pending === true;
@@ -446,6 +450,26 @@ export default function ChatShell() {
       window.setTimeout(() => setCopied(null), 1400);
     } catch {
       setCopied(null);
+    }
+  }
+
+  function downloadTravelPlan() {
+    const plan = downloadableTravelPlan(activeTrip?.messages || []);
+    const content = formatTravelPlanDownload(plan, language);
+    if (!content) return;
+    let url;
+    try {
+      url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "tourmate-trip-plan.txt";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    } catch {
+      setError(language === "zh" ? "无法保存行程文件，请重试。" : "Couldn't save the itinerary file. Please try again.");
+    } finally {
+      if (url) window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   }
 
@@ -711,6 +735,23 @@ export default function ChatShell() {
                     <button type="button" key={tool.key} disabled={!personaReady || pending || historyUnavailable}
                       onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
                   ))}
+                </nav>
+              )}
+              {persona?.id === DEFAULT_PERSONA_ID && !historyUnavailable && refinementActions.length > 0 && (
+                <nav className="tool-strip tool-strip-compact refinement-strip"
+                  aria-label={language === "zh" ? "AI 行程调整" : "AI trip refinements"}>
+                  <span className="refinement-label">{language === "zh" ? "AI 调整" : "Refine with AI"}</span>
+                  {refinementActions.map(action => (
+                    <button type="button" key={action.id}
+                      disabled={!personaReady || pending || historyUnavailable}
+                      onClick={() => chooseSuggestion(action.prompt)}>{action.label}</button>
+                  ))}
+                  {exportablePlan && (
+                    <button type="button" className="export-trip-button" onClick={downloadTravelPlan}
+                      disabled={pending} aria-label={language === "zh" ? "下载旅行计划" : "Download trip plan"}>
+                      <Icon name="download" size={15} />{language === "zh" ? "保存行程" : "Save plan"}
+                    </button>
+                  )}
                 </nav>
               )}
               {history.storageFailed && <p className="history-notice" role="status">{t.storageError}</p>}
