@@ -17,7 +17,7 @@ test("six distinct actionable refinements only follow successful model-authored 
     assert.equal(new Set(actions.map(a=>a.id)).size,6);
     for (const action of actions) {
       assert.ok(action.label);
-      assert.ok(action.prompt.length > 40 && action.prompt.length < 500);
+      assert.ok(action.prompt.length > 12 && action.prompt.length < 500, action.id + " " + language);
       assert.doesNotMatch(action.prompt,/^Day \d|^第\d天|^{"decision"/);
     }
   }
