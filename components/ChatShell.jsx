@@ -6,6 +6,7 @@ import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
 import { localHistoryForRequest } from "../lib/client/trips.js";
 import { travelRefinementActions, downloadableTravelPlan, formatTravelPlanDownload } from "../lib/client/travel-actions.js";
+import { compileItinerary, createItineraryPdf } from "../lib/client/itinerary-pdf.js";
 import { DEFAULT_PERSONA_ID, parsePublicPersona, personaIdFromSearch, provenanceLabel } from "../lib/client/personas.js";
 import {
   MAX_MESSAGE_LENGTH,
@@ -367,6 +368,7 @@ export default function ChatShell() {
   const messages = activeTrip?.messages || [];
   const refinementActions = travelRefinementActions(messages, language);
   const exportablePlan = downloadableTravelPlan(messages);
+  const pdfExportReady = Boolean(compileItinerary(messages, language));
   const draft = activeTrip?.draft || "";
   const error = activeTrip?.error || "";
   const pending = activeTrip?.pending === true;
@@ -450,6 +452,27 @@ export default function ChatShell() {
       window.setTimeout(() => setCopied(null), 1400);
     } catch {
       setCopied(null);
+    }
+  }
+
+  function downloadItineraryPdf() {
+    let url;
+    try {
+      const result = createItineraryPdf(activeTrip?.messages || [], {language});
+      if (!result) throw new Error("NO_ITINERARY");
+      url = URL.createObjectURL(result.blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "tourmate-full-itinerary.pdf";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    } catch {
+      setError(language === "zh"
+        ? "无法生成 PDF。请在行程中生成完整的每日计划后重试。"
+        : "Couldn't create the PDF. Generate a full day-by-day itinerary and try again.");
+    } finally {
+      if (url) window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   }
 
@@ -746,10 +769,17 @@ export default function ChatShell() {
                       disabled={!personaReady || pending || historyUnavailable}
                       onClick={() => chooseSuggestion(action.prompt)}>{action.label}</button>
                   ))}
+                  {pdfExportReady && (
+                    <button type="button" className="export-trip-button" onClick={downloadItineraryPdf}
+                      disabled={pending} aria-label={language === "zh" ? "下载完整行程 PDF" : "Download full itinerary PDF"}
+                      title={language === "zh" ? "A4 排版模板 · 完整行程和后续调整" : "Designed A4 template · full itinerary and follow-up changes"}>
+                      <Icon name="download" size={15} />{language === "zh" ? "下载行程 PDF" : "Download itinerary PDF"}
+                    </button>
+                  )}
                   {exportablePlan && (
-                    <button type="button" className="export-trip-button" onClick={downloadTravelPlan}
-                      disabled={pending} aria-label={language === "zh" ? "下载旅行计划" : "Download trip plan"}>
-                      <Icon name="download" size={15} />{language === "zh" ? "保存行程" : "Save plan"}
+                    <button type="button" className="export-text-button" onClick={downloadTravelPlan}
+                      disabled={pending} aria-label={language === "zh" ? "下载纯文本行程" : "Download plain text trip plan"}>
+                      {language === "zh" ? "纯文本" : "TXT"}
                     </button>
                   )}
                 </nav>
