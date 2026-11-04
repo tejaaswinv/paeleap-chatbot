@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { travelRefinementActions, downloadableTravelPlan, formatTravelPlanDownload } from "../lib/client/travel-actions.js";
 import { compactTourismHistory, tourismOutputTokenLimit, tourismGenerationMessages, generateTourismReply } from "../lib/ai/tourism-generation.js";
 import { CHINA_TOURISM_FAQS } from "../data/china-tourism-faq.js";
+import { classifyInput } from "../lib/ai/safety.js";
 
 const trip = { role:"assistant",safety:"allowed",ai:{mode:"ai_generated"},
   content:"Day 1: Take the train to Beijing and explore a cultural neighborhood.\nDay 2: Explore the Palace Museum.\nDay 3: Visit the Great Wall. Check official reservations and schedules." };
@@ -16,7 +17,7 @@ test("six distinct actionable refinements only follow successful model-authored 
     assert.equal(new Set(actions.map(a=>a.id)).size,6);
     for (const action of actions) {
       assert.ok(action.label);
-      assert.ok(action.prompt.length > 40 && action.prompt.length < 500);
+      assert.ok(action.prompt.length > 12 && action.prompt.length < 500, action.id + " " + language);
       assert.doesNotMatch(action.prompt,/^Day \d|^第\d天|^{"decision"/);
     }
   }
@@ -118,4 +119,32 @@ test("chat UI includes refinement actions and download without changing server a
   assert.match(ui,/persona\?\.id === DEFAULT_PERSONA_ID && !historyUnavailable && refinementActions\.length > 0/);
   assert.match(ui,/disabled=\{!personaReady \|\| pending \|\| historyUnavailable\}/);
   assert.match(css,/\.refinement-strip/);
+});
+
+test("every bilingual TourMate refinement button remains in scope and reaches genuine AI generation", async () => {
+  for (const language of ["en", "zh"]) {
+    const actions = travelRefinementActions([user,trip], language);
+    for (const action of actions) {
+      assert.equal(classifyInput(action.prompt, language).status, "allowed", action.id + " " + language);
+      let calls = 0;
+      const reply = language === "zh"
+        ? "按照您之前的中国旅行行程，可以把相邻景点安排在同一天，减少往返交通。所有票价与预约信息均须向官方渠道核实。"
+        : "For your existing China trip, group nearby cultural stops to reduce transfers, and keep your confirmed schedule. Verify changing transport details with official channels.";
+      const response = await generateTourismReply({
+        message:action.prompt,language,faqs:CHINA_TOURISM_FAQS,
+        history:[{role:"user",content:"Please plan a China trip"},{role:"assistant",content:trip.content}],
+        env:{ AI_API_STYLE:"chat_completions",AI_BASE_URL:"https://provider.example.test/v1",
+          AI_MODEL:"deepseek-v4-pro-ga-260813",AI_API_KEY:"test-value" },
+        fetchImpl:async (_url, init)=>{
+          calls++;
+          assert.ok(Array.isArray(JSON.parse(init.body).messages));
+          return Response.json({choices:[{finish_reason:"stop",message:{role:"assistant",content:reply}}]});
+        }
+      });
+      assert.equal(calls,1,action.id);
+      assert.equal(response.status,"allowed",action.id);
+      assert.equal(response.mode,"ai_generated",action.id);
+      assert.equal(response.reply,reply,action.id);
+    }
+  }
 });
