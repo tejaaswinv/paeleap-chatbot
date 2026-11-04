@@ -408,3 +408,19 @@ test("TourMate reports active generative setting without disclosing credentials"
   assert.equal(data.aiChatMode,"generative");
   assert.ok(!JSON.stringify(data).includes("test-provider-key"));
 });
+
+test("production-style budget refinement is AI-generated instead of wrongly redirected as outside scope", async (t) => {
+  configure(t, { AI_MOCK_MODE:"false", AI_RESPONSE_MODE:"grounded", AI_CHAT_MODE:"generative", AI_API_STYLE:"responses" });
+  const originalPrompt = "Refine your most recent China trip plan to be more budget-friendly. Keep the same destination, duration, confirmed dates and preferences. Group nearby stops and favor practical public transport; do not invent current prices.";
+  const aiAnswer = "Keep your existing four-day China trip and budget-friendly stops. Visit nearby attractions together and use practical public transport where available. Check official prices before booking.";
+  const calls = services(t, {reply:aiAnswer});
+  const response = await POST(request({message:originalPrompt,language:"en",conversationId:id}));
+  const data = await response.json();
+  assert.equal(response.status,200);
+  assert.equal(data.safety.status,"allowed");
+  assert.equal(data.reply,aiAnswer);
+  assert.equal(data.ai.mode,"ai_generated");
+  assert.equal(data.trust.basis,"ai_generated");
+  assert.equal(calls.filter(call => call.url.hostname === "provider.example.test").length,1);
+  assert.doesNotMatch(data.reply,/couldn't reliably match your question|100-question FAQ bank/i);
+});
