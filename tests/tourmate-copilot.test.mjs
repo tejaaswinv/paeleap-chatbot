@@ -78,6 +78,10 @@ test("adaptive limits reserve longer output for actual plans, not ordinary quest
   for (const message of ["Make a packing checklist for our China trip", "Create a transport checklist", "把行李清单写给我"]) {
     assert.equal(tourismOutputTokenLimit(message),1024,message);
   }
+  const actionPrompts = travelRefinementActions([user,trip], "en");
+  for (const action of actionPrompts.filter(a => ["packing","transport"].includes(a.id))) {
+    assert.equal(tourismOutputTokenLimit(action.prompt),1024,action.id);
+  }
   for (const message of ["What is West Lake?", "Where should I eat in Suzhou?"]) {
     assert.equal(tourismOutputTokenLimit(message),768,message);
   }
