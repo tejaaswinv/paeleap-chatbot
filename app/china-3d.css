@@ -3,6 +3,7 @@
  * The scene never intercepts chat input or navigation interactions.
  */
 .china-hero-stage { perspective: 1150px; }
+.china-hero-stage .china-hero-content {pointer-events:none;}
 .china-3d-experience {
   position: absolute;
   inset: 0;
