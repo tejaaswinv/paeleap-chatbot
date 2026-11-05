@@ -50,6 +50,7 @@ export default function ChinaWorldExplorer({ language = "en", onClose, onSelectP
 
   useEffect(()=>{
     if(typeof document==="undefined")return undefined;
+    active.current = true;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeRef.current?.focus();
