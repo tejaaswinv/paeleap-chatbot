@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ChinaWorldExplorer from "./ChinaWorldExplorer.jsx";
 
 /**
  * Lightweight true CSS-3D diorama: layered planes and four-sided lanterns
@@ -14,10 +15,18 @@ const VIEWS = Object.freeze([
   { x: -5, y: -11 }
 ]);
 
-export default function China3DScene({ language = "en", children }) {
+export default function China3DScene({ language = "en", children, onExplorePrompt }) {
   const experienceRef = useRef(null);
   const frameRef = useRef(0);
   const [view, setView] = useState(0);
+  const [immersiveOpen, setImmersiveOpen] = useState(false);
+  const immersiveButtonRef = useRef(null);
+
+  function closeImmersive(restoreFocus = true) {
+    setImmersiveOpen(false);
+    if (restoreFocus && typeof window !== "undefined")
+      window.requestAnimationFrame(() => immersiveButtonRef.current?.focus());
+  }
 
   useEffect(() => {
     const host = experienceRef.current;
@@ -111,6 +120,13 @@ export default function China3DScene({ language = "en", children }) {
           </svg>
         </div>
       </div>
+      <button type="button" className="china-3d-enter-control" ref={immersiveButtonRef}
+        aria-label={language === "zh" ? "进入沉浸式中国三维世界" : "Enter the immersive 3D China world"}
+        onClick={() => setImmersiveOpen(true)}>
+        <span className="china-3d-enter-spark" aria-hidden="true">✧</span>
+        <span>{language === "zh" ? "进入山海幻境" : "Enter the world"}</span>
+        <span aria-hidden="true">↗</span>
+      </button>
       <button type="button" className="china-3d-view-control"
         aria-label={language === "zh" ? "旋转三维风景视角" : "Rotate the 3D landscape view"}
         title={language === "zh" ? "旋转三维视角" : "Rotate 3D perspective"}
@@ -120,6 +136,10 @@ export default function China3DScene({ language = "en", children }) {
         </span>
         <span>{language === "zh" ? "旋转山水" : "Explore in 3D"}</span>
       </button>
+      {immersiveOpen && (
+        <ChinaWorldExplorer language={language} onClose={closeImmersive}
+          onSelectPrompt={onExplorePrompt}/>
+      )}
     </div>
   );
 }
