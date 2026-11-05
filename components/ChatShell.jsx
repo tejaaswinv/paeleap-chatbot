@@ -722,7 +722,7 @@ export default function ChatShell() {
                 <div className="welcome-panel">
                   {persona?.id === DEFAULT_PERSONA_ID ? (
                     <div className="china-hero-stage">
-                      <China3DScene language={language}><ChinaLandscape /></China3DScene>
+                      <China3DScene language={language} onExplorePrompt={chooseSuggestion}><ChinaLandscape /></China3DScene>
                       <div className="china-hero-content">
                         <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
                         <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
