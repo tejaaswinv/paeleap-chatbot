@@ -31,7 +31,7 @@ export default function ChinaHeroOrnament() {
           <path key={i} transform={"translate("+x+" "+y+") rotate("+rotate+") scale("+scale+")"}
             d="M0-26 7-14 18-18 13-4 27 0 12 8 16 21 2 13 0 28-3 13-18 22-12 8-27 0-12-5-17-18-7-13Z"
             fill={i%3===0?"#b8402f":i%3===1?"#953125":"#c75239"}
-            stroke="#7e2924" strokeWidth="1.1" opacity={i%4===0?.82:.95}/>
+            stroke="#7e2924" strokeWidth="1.1" opacity={i % 4 === 0 ? 0.82 : 0.95}/>
         ))}
         <g transform="translate(179 14)">
           <line x1="0" y1="0" x2="0" y2="80" stroke="#633d26" strokeWidth="2"/>
