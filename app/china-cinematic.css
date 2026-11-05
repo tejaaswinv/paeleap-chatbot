@@ -153,11 +153,18 @@
     linear-gradient(180deg,#8caaa0 0%,#c8c7a9 46%,#e4cb9d 83%,#d6b58a 100%);
   transition:background 1.5s ease,filter 1.5s ease;
 }
-.cinematic-overlay[data-atmosphere="night"] .cinematic-sky {
+.cinematic-sky::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
   background:
     radial-gradient(circle at 68% 19%,#8a91ae5c 0 6%,transparent 23%),
     linear-gradient(180deg,#091c33,#253b50 46%,#435261 75%,#354d52 100%);
+  opacity:0;
+  transition:opacity 1.6s ease;
 }
+.cinematic-overlay[data-atmosphere="night"] .cinematic-sky::after {opacity:1}
 .cinematic-star {
   position:absolute;
   width:2px;height:2px;
@@ -534,6 +541,7 @@
   .cinematic-hotspot-text {font-size:11px;letter-spacing:0}
   .cinematic-hotspot-text small {font-size:8px;margin-top:3px;letter-spacing:0}
   .cinematic-hotspot-arrow {display:none}
+  .cinematic-petals span:nth-child(n+7) {display:none}
   .cinematic-toolbar {
     padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
     gap:8px;
