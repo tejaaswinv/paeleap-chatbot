@@ -195,7 +195,7 @@
 .china-scene-sun-glow { animation:sun-breathe 6s ease-in-out infinite; transform-origin:806px 128px; }
 .china-scene-birds { animation:bird-drift 9s ease-in-out infinite; }
 .china-scene-water { animation:water-breathe 6s ease-in-out infinite alternate; }
-.china-scene-pavilion { filter:drop-shadow(0 3px 4px rgba(36,53,40,.12)); animation:mountain-appear 2.2s .4s ease-out both; }
+.china-scene-pavilion { filter:drop-shadow(0 3px 4px rgba(36,53,40,.12)); animation:pavilion-reveal 2.2s .4s ease-out both; }
 .china-landscape-orbit {
   position:absolute; width:410px; height:410px; top:-250px;
   border:1px solid rgba(170,116,68,.09); border-radius:50%;
@@ -217,7 +217,7 @@
   animation:lantern-sway 5.6s ease-in-out infinite alternate;
 }
 .china-scene-lantern-left {left:12%;animation-delay:-2s}
-.china-scene-lantern-right {right:11%; top:54px; transform:scale(.8);animation-duration:6.7s}
+.china-scene-lantern-right {right:11%; top:54px; scale:.8; animation-duration:6.7s}
 .china-scene-lantern::before {
   content:"";
   position:absolute; left:50%; bottom:100%; width:1px; height:48px; background:rgba(119,69,50,.6);
@@ -383,6 +383,7 @@
 @keyframes hero-rise {from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes card-arrive {from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes message-unfold {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pavilion-reveal {from{opacity:0}to{opacity:1}}
 @keyframes cloud-drift {from{transform:translateX(-16px)}to{transform:translateX(42px)}}
 @keyframes mountain-appear {from{opacity:0;transform:translateY(29px)}to{opacity:1;transform:translateY(0)}}
 @keyframes mountain-breathe {from{transform:scale(1) translateY(0)}to{transform:scale(1.025) translateY(4px)}}
@@ -419,8 +420,8 @@
   .hero-cn-title {font-size:clamp(45px,11vw,67px);letter-spacing:.09em}
   .hero-en-title {font-size:clamp(23px,6vw,32px)}
   .app-shell .china-hero-content .welcome-copy {font-size:11px;margin-top:16px;max-width:330px}
-  .china-scene-lantern-left {left:8%;top:20px;transform:scale(.7)}
-  .china-scene-lantern-right {right:8%;top:38px;transform:scale(.6)}
+  .china-scene-lantern-left {left:8%;top:20px;scale:.7}
+  .china-scene-lantern-right {right:8%;top:38px;scale:.6}
   .app-shell .suggestion-grid {grid-template-columns:1fr;gap:9px}
   .app-shell .suggestion-card {min-height:106px;padding:13px 15px}
   .app-shell .suggestion-card strong {margin-top:3px;font-size:18px}
