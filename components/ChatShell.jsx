@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthPanel from "./AuthPanel.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
+import China3DScene from "./China3DScene.jsx";
+import { applyCardDepth, resetCardDepth } from "../lib/client/visual-depth.js";
 import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
 import { localHistoryForRequest } from "../lib/client/trips.js";
@@ -720,7 +722,7 @@ export default function ChatShell() {
                 <div className="welcome-panel">
                   {persona?.id === DEFAULT_PERSONA_ID ? (
                     <div className="china-hero-stage">
-                      <ChinaLandscape />
+                      <China3DScene language={language}><ChinaLandscape /></China3DScene>
                       <div className="china-hero-content">
                         <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
                         <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
@@ -740,7 +742,8 @@ export default function ChatShell() {
                   {persona?.id === DEFAULT_PERSONA_ID && <div className="china-journey-heading"><span className="china-journey-eyebrow">启程 · BEGIN YOUR JOURNEY</span><p>{language === "zh" ? "选一个故事开始，或写下你心中的目的地" : "Pick a path to begin, or tell us where your heart wants to go."}</p></div>}
                   <div className="suggestion-grid grid grid-cols-3 gap-3 text-left max-[900px]:grid-cols-1">
                     {suggestions.map((suggestion, index) => (
-                      <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}>
+                      <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}
+                        onPointerMove={applyCardDepth} onPointerLeave={resetCardDepth} onBlur={resetCardDepth}>
                         <span className="suggestion-number"><span className="suggestion-index">0{index + 1}</span><span className="suggestion-chop" aria-hidden="true">{["京","杭","古"][index]}</span></span>
                         <strong>{suggestion.title}</strong>
                         <span>{suggestion.body}</span>

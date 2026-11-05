@@ -1,0 +1,287 @@
+/* TourMate: lightweight depth-driven 3D scene and raised travel cards.
+ * Actual perspective and separate Z planes; no Three.js/WebGL download.
+ * The scene never intercepts chat input or navigation interactions.
+ */
+.china-hero-stage { perspective: 1150px; }
+.china-hero-stage .china-hero-content {pointer-events:none;}
+.china-3d-experience {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  perspective: 950px;
+  perspective-origin: 50% 44%;
+  --scene-rx: -2deg;
+  --scene-ry: 0deg;
+}
+.china-3d-world {
+  position: absolute;
+  inset: -4% -3%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--scene-rx)) rotateY(var(--scene-ry));
+  transform-origin: 50% 48%;
+  transition: transform 300ms cubic-bezier(.22,.8,.25,1);
+  will-change: transform;
+  pointer-events: none;
+}
+.china-3d-backplane {
+  position:absolute;
+  inset:0;
+  transform: translateZ(-70px) scale(1.14);
+  transform-style: preserve-3d;
+  filter: saturate(1.06);
+}
+.china-3d-backplane .china-landscape { inset:0; }
+.china-3d-backplane .china-scene-lantern { display:none; }
+.china-3d-backplane .china-scene-bottom-fade { opacity:.68; }
+.china-3d-depth-haze { position:absolute; pointer-events:none; border-radius:50%; }
+.china-3d-depth-haze-back {
+  left:14%; top:26%; height:34%; width:60%;
+  transform: translateZ(-15px) rotateX(65deg);
+  background:radial-gradient(ellipse,rgba(255,246,226,.5),transparent 72%);
+  filter:blur(25px);
+  animation:three-d-haze 11s ease-in-out infinite alternate;
+}
+.china-3d-depth-haze-front {
+  left:10%; right:10%; bottom:2%; height:30%;
+  transform:translateZ(105px) rotateX(63deg);
+  background:radial-gradient(ellipse,rgba(255,253,242,.57),rgba(255,253,242,.03) 67%,transparent 76%);
+  filter:blur(23px);
+  animation:three-d-haze 15s ease-in-out infinite alternate-reverse;
+}
+.china-3d-floating-islands {
+  position:absolute;
+  inset:0;
+  transform-style: preserve-3d;
+}
+.china-3d-island {
+  position:absolute;
+  bottom:8%;
+  width:36%;
+  height:42px;
+  transform-style:preserve-3d;
+  transform:translateZ(60px) rotateX(67deg);
+  background:radial-gradient(ellipse,#426b5d30 3%,#4d82702b 50%,transparent 73%);
+  border-radius:50%;
+  filter:blur(6px);
+}
+.china-3d-island-left {left:-6%}
+.china-3d-island-right {right:-8%;width:30%;transform:translateZ(100px) rotateX(67deg)}
+.china-3d-foreground {
+  position:absolute;
+  left:-2%;
+  right:-2%;
+  bottom:-5%;
+  height:24%;
+  opacity:.68;
+  transform:translateZ(118px) rotateX(9deg) scale(1.05);
+  transform-origin:bottom;
+  filter:blur(.5px);
+}
+.china-3d-foreground svg {width:100%;height:100%;display:block}
+
+/* Four distinct lantern faces form an actual CSS 3D volume. */
+.china-3d-lantern {
+  position:absolute;
+  width:40px;
+  height:78px;
+  transform-style:preserve-3d;
+  transform-origin:center -30px;
+  animation:three-d-lantern-float 7s ease-in-out infinite alternate;
+}
+.china-3d-lantern-left {left:13%;top:18%;transform:translateZ(143px)}
+.china-3d-lantern-right {right:11%;top:26%;transform:translateZ(105px) scale(.85);animation-delay:-3.5s;animation-duration:8.3s}
+.china-3d-lantern-cord {
+  position:absolute;
+  left:calc(50% - 1px);
+  top:-38px;
+  height:44px;
+  width:1px;
+  background:linear-gradient(#a8815a66,#7e4d36a9);
+  transform:translateZ(0);
+}
+.china-3d-lantern-body {
+  position:absolute;
+  inset:2px 4px 25px;
+  transform-style:preserve-3d;
+  animation:three-d-lantern-turn 13s ease-in-out infinite alternate;
+}
+.china-3d-lantern-right .china-3d-lantern-body {animation-delay:-4s}
+.china-3d-lantern-face {
+  position:absolute;
+  inset:0;
+  display:block;
+  border:2px solid #993e32cf;
+  border-top:4px solid #753328;
+  border-bottom:4px solid #753328;
+  border-radius:38% 38% 29% 29%;
+  background:
+    linear-gradient(90deg,transparent 31%,rgba(250,183,115,.35) 32% 35%,transparent 36% 64%,rgba(250,183,115,.35) 65% 68%,transparent 69%),
+    linear-gradient(110deg,#8e2e29,#d26045 49%,#862f28);
+  box-shadow: inset 0 0 13px #f6b56f4c,0 0 15px #d66f4640;
+  backface-visibility:visible;
+}
+.lantern-face-front {transform:rotateY(0deg) translateZ(14px)}
+.lantern-face-back {transform:rotateY(180deg) translateZ(14px)}
+.lantern-face-left {transform:rotateY(-90deg) translateZ(14px)}
+.lantern-face-right {transform:rotateY(90deg) translateZ(14px)}
+.china-3d-lantern-glow {
+  position:absolute;
+  inset:7px;
+  background:radial-gradient(circle,#ffd5a1af,#df7e4b38 65%,transparent);
+  transform:translateZ(1px);
+  border-radius:50%;
+  filter:blur(11px);
+}
+.china-3d-lantern-tail {
+  position:absolute;
+  left:50%;
+  top:54px;
+  width:2px;
+  height:27px;
+  background:linear-gradient(#ba5b44,#a34435 65%,transparent);
+  box-shadow:-4px 5px #ac503d68,4px 7px #ac503d68;
+  transform:translateZ(10px);
+}
+.china-3d-view-control {
+  position:absolute;
+  z-index:5;
+  right:23px;
+  bottom:21px;
+  pointer-events:auto;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:8px 12px 8px 9px;
+  border:1px solid #bfa5818c;
+  border-radius:99px;
+  color:#694e3d;
+  background:#fff8e9e8;
+  box-shadow:0 8px 22px #61432a25, inset 0 1px #ffffffbd;
+  backdrop-filter:blur(7px);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+.china-3d-view-control:hover:not(:disabled) {transform:translateY(-3px);border-color:#ac7958;background:#fffaf0;box-shadow:0 12px 26px #61432a30}
+.china-3d-view-control:focus-visible {outline:3px solid #ae7b5d;outline-offset:3px}
+.china-3d-view-icon {
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  perspective:200px;
+}
+.china-3d-compass-ring {
+  width:28px;height:28px;
+  display:grid;place-items:center;
+  position:relative;
+  transform-style:preserve-3d;
+  border:2px solid #ba8062;
+  border-radius:50%;
+  background:radial-gradient(circle,#f8ead1,#dfbb91);
+  box-shadow:0 2px 2px #84543d3a,inset 0 0 0 3px #fff5e4;
+  transform:rotateX(27deg) rotateZ(-25deg);
+  transition:transform .6s cubic-bezier(.2,.75,.2,1);
+}
+.china-3d-view-control:hover .china-3d-compass-ring {transform:rotateX(48deg) rotateZ(110deg)}
+.china-3d-compass-ring::before, .china-3d-compass-ring::after {
+  content:"";
+  position:absolute;
+  background:#ad5742;
+  height:18px;width:1px;
+}
+.china-3d-compass-ring::after {transform:rotate(90deg);opacity:.53}
+.china-3d-compass-needle {
+  width:0;height:0;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  border-bottom:11px solid #a63c32;
+  transform:translateY(-4px) translateZ(9px);
+  filter:drop-shadow(0 2px 2px #86523b52);
+}
+.china-3d-experience[data-scene-view="1"] .china-3d-compass-ring {border-color:#b95a45}
+.china-3d-experience[data-scene-view="2"] .china-3d-compass-ring {border-color:#5e8e77}
+
+/* Three-dimensional destination tiles; all original button behavior remains. */
+.app-shell .suggestion-card {
+  --card-rotate-x:0deg;
+  --card-rotate-y:0deg;
+  --card-lift:0px;
+  transform-style:preserve-3d;
+  transform:perspective(850px) rotateX(var(--card-rotate-x)) rotateY(var(--card-rotate-y)) translateY(var(--card-lift));
+  transition:transform .21s ease-out,box-shadow .24s,border-color .24s;
+  will-change:transform;
+}
+.app-shell .suggestion-card:hover {
+  --card-lift:-5px;
+  transform:perspective(850px) rotateX(var(--card-rotate-x)) rotateY(var(--card-rotate-y)) translateY(var(--card-lift));
+}
+.app-shell .suggestion-card .suggestion-number,
+.app-shell .suggestion-card strong,
+.app-shell .suggestion-card > span:last-of-type,
+.app-shell .suggestion-card i {
+  transform:translateZ(21px);
+  position:relative;
+  z-index:1;
+}
+.app-shell .suggestion-card .suggestion-chop {
+  transform:translateZ(32px) rotate(-5deg);
+  box-shadow:0 7px 14px #8b493332,inset 0 0 0 3px #ffffff20;
+}
+.app-shell .suggestion-card::before {
+  content:"";
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:radial-gradient(circle at var(--card-light-x,50%) var(--card-light-y,25%),rgba(255,255,255,.5),transparent 53%);
+  opacity:.6;
+  transform:translateZ(2px);
+}
+.app-shell .suggestion-card:hover .suggestion-chop {
+  box-shadow:0 12px 24px #8b493340,inset 0 0 0 3px #ffffff20;
+}
+@keyframes three-d-lantern-float {
+  from {translate:0 -4px;rotate:-4deg}
+  to {translate:0 7px;rotate:4deg}
+}
+@keyframes three-d-lantern-turn {
+  from {transform:rotateY(-20deg)}
+  to {transform:rotateY(32deg)}
+}
+@keyframes three-d-haze {
+  from {opacity:.43;scale:.94}
+  to {opacity:.72;scale:1.11}
+}
+@media (max-width:720px) {
+  .china-3d-world {inset:-2% -4%}
+  .china-3d-lantern-left {left:9%;top:15%;scale:.75}
+  .china-3d-lantern-right {right:8%;top:23%;scale:.68}
+  .china-3d-foreground {bottom:-5%;height:20%;opacity:.47}
+  .china-3d-view-control {right:13px;bottom:11px;padding:6px 9px 6px 7px;font-size:10px}
+  .china-3d-view-icon {width:27px;height:27px}
+  .china-3d-compass-ring {width:24px;height:24px}
+}
+@media (hover:none), (pointer:coarse) {
+  /* No tilt on touch devices; tap controls and design remain unchanged. */
+  .china-3d-world {transform:none!important;will-change:auto}
+  .app-shell .suggestion-card, .app-shell .suggestion-card:hover {transform:none;will-change:auto}
+  .china-3d-view-control {display:none}
+}
+@media (prefers-reduced-motion:reduce) {
+  .china-3d-world, .china-3d-lantern, .china-3d-lantern-body,
+  .china-3d-depth-haze, .china-3d-compass-ring,
+  .app-shell .suggestion-card, .app-shell .suggestion-card:hover {
+    animation:none!important;
+    transition:none!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    will-change:auto!important;
+  }
+  .china-3d-view-control {display:none}
+  .china-3d-lantern {opacity:.8}
+}
