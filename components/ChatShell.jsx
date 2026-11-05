@@ -658,7 +658,7 @@ export default function ChatShell() {
         <button className="new-trip-button" type="button" onClick={startNewTrip} disabled={!history.ready}>
           <Icon name="plus" size={19} />{t.newTrip}
         </button>
-        {persona?.id === DEFAULT_PERSONA_ID && (
+        {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
           <nav className="imperial-side-menu" aria-label={language === "zh" ? "旅行导航" : "Travel navigation"}>
             <button type="button" onClick={startNewTrip} disabled={!history.ready}>
               <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
@@ -709,7 +709,7 @@ export default function ChatShell() {
           <button className="mobile-new-trip" type="button" onClick={startNewTrip} disabled={!history.ready} aria-label={t.newTrip}>
             <Icon name="plus" size={19} />
           </button>
-          {persona?.id === DEFAULT_PERSONA_ID && (
+          {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
             <nav className="imperial-topnav" aria-label={language === "zh" ? "主导航" : "Main navigation"}>
               <button type="button" className="imperial-nav-active"
                 onClick={() => textareaRef.current?.focus()}><Icon name="spark" size={17}/>{language === "zh" ? "AI 旅行对话" : "AI Travel Chat"}</button>
@@ -816,6 +816,7 @@ export default function ChatShell() {
                 <div className="message-list" aria-live="polite">
                   {persona?.id === DEFAULT_PERSONA_ID && (
                     <div className="imperial-chat-heading">
+                      <ChinaLandscape />
                       <span className="imperial-chat-heading-seal" aria-hidden="true">旅</span>
                       <div><span className="imperial-chat-eyebrow">{language === "zh" ? "山海行记 · AI 旅伴" : "THE JOURNEY CONTINUES"}</span>
                       <h2>{activeTrip?.title || (language === "zh" ? "我的中国之旅" : "Your China travel story")}</h2></div>
