@@ -663,7 +663,7 @@ export default function ChatShell() {
             <button type="button" onClick={startNewTrip} disabled={!history.ready}>
               <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
             </button>
-            <button type="button" onClick={() => setNavExplorerOpen(true)} ref={navExplorerRef}>
+            <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
               <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}
             </button>
             <button type="button" onClick={() => chooseSuggestion(language === "zh"
@@ -717,7 +717,7 @@ export default function ChatShell() {
               <button type="button" onClick={startNewTrip} disabled={!history.ready}>
                 <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a Trip"}</button>
               <span aria-hidden="true" className="imperial-nav-divider"/>
-              <button type="button" onClick={() => setNavExplorerOpen(true)} ref={navExplorerRef}>
+              <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
                 <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}</button>
               <span aria-hidden="true" className="imperial-nav-divider"/>
               <button type="button" onClick={() => chooseSuggestion(language === "zh"
