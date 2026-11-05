@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthPanel from "./AuthPanel.jsx";
+import ChinaLandscape from "./ChinaLandscape.jsx";
 import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
 import { localHistoryForRequest } from "../lib/client/trips.js";
@@ -20,7 +21,7 @@ import {
 
 const text = {
   en: {
-    brandTag: "AI TOUR COMPANION",
+    brandTag: "东方风物 · EXPLORE CHINA",
     newTrip: "New trip",
     recent: "CURRENT TRIPS",
     untitledTrip: "New trip",
@@ -44,8 +45,8 @@ const text = {
     connectionBody: "TourMate couldn't reach the chat service. Check your connection and try again.",
     retry: "Try again",
     welcomeKicker: "YOUR CHINA TRAVEL COMPANION",
-    welcomeTitle: "Where should we explore?",
-    welcomeBody: "Explore 100 travel FAQs covering arrivals, payments, transport, food and sightseeing in China. Answers come from our question bank, not live booking data.",
+    welcomeTitle: "A thousand journeys. One unforgettable China.",
+    welcomeBody: "From misty mountain towns to lantern-lit streets, let your AI travel companion plan a journey that feels like yours.",
     composerLabel: "Ask TourMate",
     placeholder: "Ask about travel in China…",
     send: "Send message",
@@ -68,7 +69,7 @@ const text = {
     copied: "Copied",
     copy: "Copy response",
     dismiss: "Dismiss",
-    thinking: "Looking through the travel notes",
+    thinking: "Following the winding roads…",
     loading: "Preparing your travel space…",
     profileError: "This assistant profile could not be loaded. Check the museum link or try again.",
     profileTitle: "Assistant unavailable",
@@ -82,9 +83,9 @@ const text = {
       { key: "heritage_choice", title: "Heritage choice", prompt: "Show West Lake vs Grand Canal choice card" }
     ],
     suggestions: [
-      { title: "Getting around", body: "Book a train with your passport", prompt: "How do I book a train ticket in China?" },
-      { title: "Pay with confidence", body: "Learn about visitor payments", prompt: "Can foreign tourists use Alipay?" },
-      { title: "Explore West Lake", body: "Learn what makes it significant", prompt: "What is West Lake and why is it culturally significant?" }
+      { title: "The imperial route", body: "Four unforgettable days in Beijing", prompt: "Plan a 4-day 3-night Beijing trip with temples, old neighborhoods and a Great Wall day trip." },
+      { title: "Misty Hangzhou", body: "Lakes, tea hills and slow mornings", prompt: "Plan a beautiful and relaxed 2-day itinerary for Hangzhou including West Lake, tea villages and local cultural experiences." },
+      { title: "Hidden heritage", body: "The quieter side of China", prompt: "Recommend underrated heritage towns and memorable cultural experiences in China for a first-time traveler." }
     ]
   },
   zh: {
@@ -112,8 +113,8 @@ const text = {
     connectionBody: "无法连接到聊天服务，请检查网络后重试。",
     retry: "重试",
     welcomeKicker: "你的中国旅行伴侣",
-    welcomeTitle: "今天想去哪里探索？",
-    welcomeBody: "100 题旅游问答涵盖入境准备、支付、交通、餐饮和景点游览。回复来自问答库，不包含实时预订数据。",
+    welcomeTitle: "一程山水，一段故事。",
+    welcomeBody: "从云雾缭绕的山间古镇，到灯火璀璨的城市街巷，让 AI 旅伴陪你写下独一无二的中国旅程。",
     composerLabel: "询问 TourMate",
     placeholder: "询问中国旅游相关问题…",
     send: "发送消息",
@@ -136,7 +137,7 @@ const text = {
     copied: "已复制",
     copy: "复制回复",
     dismiss: "关闭",
-    thinking: "正在查阅旅行资料",
+    thinking: "正在寻访山海之间…",
     loading: "正在准备你的旅行空间…",
     profileError: "无法加载此助手配置，请检查场馆链接或重试。",
     profileTitle: "助手暂不可用",
@@ -150,9 +151,9 @@ const text = {
       { key: "heritage_choice", title: "景点对比", prompt: "查看西湖与大运河对比卡" }
     ],
     suggestions: [
-      { title: "轻松出行", body: "了解如何使用护照购买火车票", prompt: "在中国如何预订火车票？" },
-      { title: "安心支付", body: "了解游客支付方式", prompt: "外国游客可以使用支付宝吗？" },
-      { title: "探索西湖", body: "了解它的重要意义", prompt: "西湖是什么，为什么具有文化意义？" }
+      { title: "京城旧梦", body: "四天走进北京的古今", prompt: "帮我规划北京4天3晚行程，包含故宫、老胡同和一天长城体验。" },
+      { title: "烟雨杭州", body: "西湖茶山与慢生活", prompt: "帮我规划杭州两日悠闲行程，包含西湖、茶园和当地文化体验。" },
+      { title: "寻访古韵", body: "探索更小众的中国", prompt: "推荐中国适合初次游客的小众古镇和有特色的传统文化体验。" }
     ]
   }
 };
@@ -632,6 +633,7 @@ export default function ChatShell() {
           <Brand name={personaName} avatar={avatar} />
           <p className="brand-tag">{t.brandTag}</p>
           {persona && <p className="venue-name">{persona.venue[language]}</p>}
+          {persona?.id === DEFAULT_PERSONA_ID && <div className="sidebar-heritage-sign" aria-hidden="true"><span>山</span><span>海</span><span>行</span><span>记</span></div>}
           </div>
           <button className="sidebar-close" type="button" aria-label={t.closeTrips} onClick={() => { setSidebarOpen(false); historyButtonRef.current?.focus(); }}><Icon name="close" size={20} /></button>
         </div>
@@ -672,6 +674,7 @@ export default function ChatShell() {
             <Icon name="plus" size={19} />
           </button>
           <div className="service-pill"><span className={`status-dot ${service.state}`} />{statusLabel}</div>
+          {persona?.id === DEFAULT_PERSONA_ID && <div className="topbar-poem" aria-hidden="true"><span className="topbar-poem-mark">山</span><span>云游四方 · 风雅中国</span></div>}
           {persona && <span className="profile-identity" title={`${t.profileVersion} ${persona.version}`}>{personaName}</span>}
           <div className="topbar-actions">
             <div className="language-toggle" aria-label="Language">
@@ -715,14 +718,30 @@ export default function ChatShell() {
                 </div>
               ) : messages.length === 0 ? (
                 <div className="welcome-panel">
-                  <div className="welcome-seal" aria-hidden="true"><span>{avatar}</span></div>
-                  <p className="section-kicker">{persona?.venue[language] || t.welcomeKicker}</p>
-                  <h1>{personaName}</h1>
-                  <p className="welcome-copy">{persona?.greeting[language] || t.welcomeBody}</p>
+                  {persona?.id === DEFAULT_PERSONA_ID ? (
+                    <div className="china-hero-stage">
+                      <ChinaLandscape />
+                      <div className="china-hero-content">
+                        <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
+                        <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
+                        <h1><span className="hero-cn-title">山海之间</span><span className="hero-en-title">{language === "zh" ? "遇见你的中国" : "Find your China."}</span></h1>
+                        <p className="welcome-copy">{t.welcomeBody}</p>
+                        <div className="china-hero-divider" aria-hidden="true"><span />✧<span /></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="china-persona-intro">
+                      <div className="welcome-seal" aria-hidden="true"><span>{avatar}</span></div>
+                      <p className="section-kicker">{persona?.venue[language] || t.welcomeKicker}</p>
+                      <h1>{personaName}</h1>
+                      <p className="welcome-copy">{persona?.greeting[language] || t.welcomeBody}</p>
+                    </div>
+                  )}
+                  {persona?.id === DEFAULT_PERSONA_ID && <div className="china-journey-heading"><span className="china-journey-eyebrow">启程 · BEGIN YOUR JOURNEY</span><p>{language === "zh" ? "选一个故事开始，或写下你心中的目的地" : "Pick a path to begin, or tell us where your heart wants to go."}</p></div>}
                   <div className="suggestion-grid grid grid-cols-3 gap-3 text-left max-[900px]:grid-cols-1">
                     {suggestions.map((suggestion, index) => (
                       <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}>
-                        <span className="suggestion-number">0{index + 1}</span>
+                        <span className="suggestion-number"><span className="suggestion-index">0{index + 1}</span><span className="suggestion-chop" aria-hidden="true">{["京","杭","古"][index]}</span></span>
                         <strong>{suggestion.title}</strong>
                         <span>{suggestion.body}</span>
                         <i aria-hidden="true">→</i>
