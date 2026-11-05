@@ -484,6 +484,7 @@
 /* A conversation is a travel journal, not an anonymous message list. */
 .imperial-tourmate .message-list {max-width:1040px;padding:23px 34px 34px}
 .imperial-tourmate .imperial-chat-heading {
+  position:relative;isolation:isolate;overflow:hidden;
   display:flex;align-items:center;gap:15px;
   min-height:83px;
   margin:0 0 25px;
@@ -496,6 +497,14 @@
     linear-gradient(110deg,#fff4df,#f6e7cd);
   box-shadow:0 7px 20px #82512d15;
 }
+.imperial-tourmate .imperial-chat-heading .china-landscape {
+  inset:-130px 0 -80px 22%;
+  z-index:0;
+  opacity:.23;
+  filter:saturate(.7) sepia(.2);
+  pointer-events:none;
+}
+.imperial-tourmate .imperial-chat-heading > :not(.china-landscape) {position:relative;z-index:1}
 .imperial-tourmate .imperial-chat-heading-seal {
   display:grid;place-items:center;
   flex:0 0 45px;width:45px;height:45px;
