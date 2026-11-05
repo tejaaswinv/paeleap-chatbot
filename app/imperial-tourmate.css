@@ -1,0 +1,728 @@
+/*
+ * TourMate · Imperial Red / Gilded Journey
+ * A complete red-and-gold travel UI inspired by the approved visual direction.
+ * Original vector illustrations, no downloaded fonts or stock assets.
+ */
+.app-shell.imperial-tourmate {
+  --pine-950:#3e1212;
+  --pine-900:#621616;
+  --pine-800:#7b201d;
+  --pine-700:#98392e;
+  --jade-500:#a26a45;
+  --jade-300:#d8b982;
+  --jade-100:#f9edda;
+  --paper:#fbf3e8;
+  --canvas:#f4e6d3;
+  --white:#fff9ef;
+  --ink:#391e1b;
+  --muted:#846d5e;
+  --line:#e4ccb0;
+  --gold:#bf8d48;
+  --shadow-soft:0 20px 52px #642c1726;
+  background:#f5e8d8;
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei","Segoe UI",sans-serif;
+}
+.imperial-tourmate :focus-visible {outline:3px solid #d7a351;outline-offset:3px}
+.imperial-tourmate button {transition:background .24s ease,border-color .24s ease,color .24s ease,transform .24s ease,box-shadow .24s ease}
+.imperial-tourmate ::selection {background:#f0c783;color:#5e1817}
+.imperial-tourmate :is(.brand-name,.suggestion-card strong,.imperial-chat-heading h2,.china-journey-eyebrow,.sidebar-label,.imperial-side-menu,.imperial-topnav) {
+  text-rendering:optimizeLegibility;
+}
+
+/* Lacquered sidebar with gilded architectural ornament. */
+.imperial-tourmate .sidebar {
+  isolation:isolate;
+  padding:24px 19px 20px;
+  color:#fff0d4;
+  background:
+    radial-gradient(ellipse at 120% 12%,#b942314f,transparent 48%),
+    radial-gradient(ellipse at 2% 103%,#bd693321,transparent 43%),
+    repeating-linear-gradient(0deg,transparent 0 29px,#f8d79205 29px 30px),
+    linear-gradient(168deg,#73150f 0%,#570b0b 55%,#470808 100%);
+  border-right:2px solid #cf9249;
+  box-shadow:inset -1px 0 #f7ce8959,8px 0 38px #41160e28;
+}
+.imperial-tourmate .sidebar::before {
+  content:"";
+  position:absolute;
+  left:9px;top:9px;right:9px;bottom:9px;
+  border:1px solid #ecc18a2e;
+  border-radius:2px;
+  transform:none;
+  white-space:normal;
+  pointer-events:none;
+}
+.imperial-tourmate .sidebar::after {
+  content:"";
+  position:absolute;
+  left:-36px;bottom:-27px;
+  width:280px;height:186px;
+  border:0;border-radius:0;
+  box-shadow:none;
+  pointer-events:none;
+  opacity:.54;
+  background:
+    radial-gradient(ellipse at 25% 92%,#a7492b 0 3px,transparent 4px),
+    repeating-radial-gradient(ellipse at 30% 85%,transparent 0 18px,#d5a25950 19px 20px,transparent 21px 43px);
+  z-index:-1;
+}
+.imperial-tourmate .brand {gap:12px}
+.imperial-tourmate .brand-symbol {
+  width:49px;height:49px;flex-shrink:0;
+  display:grid;place-items:center;
+  transform:rotate(-4deg);
+  border-radius:7px 2px 7px 2px;
+  color:#ffedbf;
+  border:1px solid #dca65d;
+  background:linear-gradient(135deg,#aa4030,#69120f);
+  box-shadow:inset 0 0 0 4px #f5d19626,0 5px 13px #2a0d0c74;
+}
+.imperial-tourmate .brand-symbol span {
+  transform:rotate(4deg);
+  font:27px/1 "Songti SC",STSong,Georgia,serif;
+}
+.imperial-tourmate .brand-name {
+  color:#fff0cf;
+  max-width:200px;
+  font:600 28px/1.1 "Songti SC",STSong,Georgia,serif;
+  letter-spacing:-.02em;
+  text-shadow:0 2px 6px #330d0a35;
+}
+.imperial-tourmate .brand-tag {
+  margin:9px 0 0 61px;
+  color:#e7c38d;
+  font-size:9px;
+  font-weight:650;
+  letter-spacing:.14em;
+}
+.imperial-tourmate .venue-name {color:#e4b87f}
+.imperial-tourmate .sidebar-heritage-sign {display:none}
+.imperial-tourmate .new-trip-button {
+  width:100%;margin:27px 0 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:46px;
+  border:1px solid #f8d9a3;
+  border-radius:10px;
+  padding:11px 16px;
+  color:#5a2117;
+  background:linear-gradient(125deg,#ffebbb,#e8b86e);
+  box-shadow:0 6px 18px #250b0b3d,inset 0 1px #fff4d9a8;
+  font-weight:750;font-size:13px;
+}
+.imperial-tourmate .new-trip-button svg {color:#702720}
+.imperial-tourmate .new-trip-button:hover:not(:disabled) {background:linear-gradient(125deg,#fff3d5,#f0c985);border-color:#fff3d6;transform:translateY(-2px)}
+.imperial-tourmate .imperial-side-menu {
+  display:grid;gap:3px;
+  padding:4px 0 19px;
+  margin-bottom:15px;
+  border-bottom:1px solid #dfb17755;
+}
+.imperial-tourmate .imperial-side-menu button {
+  width:100%;min-height:41px;
+  display:flex;align-items:center;gap:12px;
+  padding:7px 11px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:#f4ddbb;
+  text-align:left;
+  font-size:12px;
+  font-weight:600;
+}
+.imperial-tourmate .imperial-side-menu button svg {color:#efc27f;flex-shrink:0}
+.imperial-tourmate .imperial-side-menu button:hover:not(:disabled) {
+  background:#f4cb8720;
+  border-color:#f5c6873c;
+  color:#fff6db;transform:translateX(3px);
+}
+.imperial-tourmate .sidebar-label {
+  color:#d7ac75;
+  font:700 11px/1.4 "Songti SC",STSong,Georgia,serif;
+  letter-spacing:.13em;
+}
+.imperial-tourmate .trip-scroll {scrollbar-color:#c09566 transparent}
+.imperial-tourmate .trip-item {
+  min-height:44px;
+  padding:9px 10px;
+  border:1px solid transparent;
+  border-radius:8px;
+  color:#ebccb0;
+}
+.imperial-tourmate .trip-item:hover {background:#d99e6018;border-color:#edc48f29}
+.imperial-tourmate .trip-item.active {
+  background:linear-gradient(100deg,#bd553f62,#d0885d25);
+  border-color:#e2b17a43;
+  color:#fff6dc;
+}
+.imperial-tourmate .trip-item.active::before {background:#f1c284}
+.imperial-tourmate .trip-item strong {color:#f9e7ca;font-size:12px}
+.imperial-tourmate .trip-item small {color:#d8b08a}
+.imperial-tourmate .trip-icon {
+  border-radius:7px;
+  color:#ecc58d;
+  background:#f0be8733;
+}
+.imperial-tourmate .trip-item.active .trip-icon {background:#f9c68837}
+.imperial-tourmate .trust-card {
+  border:1px solid #e1b17e45;
+  border-radius:9px;
+  background:linear-gradient(120deg,#9e3d2828,#fff0cb0d);
+}
+.imperial-tourmate .trust-card strong {color:#ffe7bd}
+.imperial-tourmate .trust-card p {color:#ddbc97}
+.imperial-tourmate .trust-icon {color:#edbb83;background:#dfb16d26}
+.imperial-tourmate .sidebar-disclaimer {color:#ddb98f}
+
+/* Rich full-width crimson app bar; every item has a real action. */
+.imperial-tourmate .main-panel {
+  background:#fbf2e7;
+  background-image:
+    radial-gradient(circle at 96% 8%,#efd5b550,transparent 43%),
+    repeating-linear-gradient(0deg,transparent 0 89px,#a77a4310 90px);
+}
+.imperial-tourmate .topbar {
+  height:72px;
+  padding:0 clamp(14px,2.4vw,34px);
+  gap:14px;
+  border-bottom:2px solid #cf9d59;
+  background:
+    linear-gradient(0deg,#410b0a00,#ab483419),
+    linear-gradient(105deg,#68100e,#7b1712 58%,#5c100f);
+  box-shadow:0 5px 22px #5421101b;
+}
+.imperial-tourmate .topbar::after {
+  background:linear-gradient(90deg,transparent,#f2ca8a99,transparent);
+  opacity:.43;
+}
+.imperial-tourmate .imperial-topnav {
+  display:flex;align-items:center;gap:8px;
+  flex:1;min-width:0;
+  overflow-x:auto;scrollbar-width:none;
+}
+.imperial-tourmate .imperial-topnav::-webkit-scrollbar {display:none}
+.imperial-tourmate .imperial-topnav button {
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:40px;
+  padding:8px 13px;
+  border:1px solid transparent;
+  border-radius:9px;
+  color:#f5d9ae;
+  background:transparent;
+  font:600 12px/1.2 "Songti SC",STSong,Georgia,serif;
+  letter-spacing:.015em;
+  white-space:nowrap;
+}
+.imperial-tourmate .imperial-topnav button svg {color:#ecc17e;flex-shrink:0}
+.imperial-tourmate .imperial-topnav button:hover:not(:disabled) {border-color:#f3ca8a5c;background:#f9c8841b;color:#fff7de}
+.imperial-tourmate .imperial-topnav .imperial-nav-active {
+  background:linear-gradient(130deg,#a84230,#792017);
+  color:#fff0c9;
+  border-color:#dfad6e9c;
+  box-shadow:inset 0 1px #f7d49741,0 3px 13px #240b0a42;
+}
+.imperial-tourmate .imperial-nav-divider {
+  flex:0 0 auto;width:1px;height:20px;
+  background:#dfad6d77;
+}
+.imperial-tourmate .topbar-poem {display:none}
+.imperial-tourmate .service-pill {
+  gap:7px;color:#f0d9b1;white-space:nowrap;font-size:10px;
+}
+.imperial-tourmate .status-dot.ready {background:#e0b978;box-shadow:0 0 0 4px #dfb97430}
+.imperial-tourmate .topbar-actions {margin-left:4px;gap:9px;flex-shrink:0}
+.imperial-tourmate .language-toggle {
+  background:#430b0b68;
+  border-color:#d9a56485;
+  border-radius:8px;
+}
+.imperial-tourmate .language-toggle button {color:#f4cc93;border-radius:6px}
+.imperial-tourmate .language-toggle button.active {color:#641815;background:linear-gradient(#fff2d4,#efc88b);box-shadow:0 2px 8px #240b0b32}
+.imperial-tourmate .signout-button {border:1px solid #dfa7656b;background:#4f151272;color:#ffe1ac;border-radius:8px}
+.imperial-tourmate .signout-button:hover {background:#a54c34;color:#fff5da}
+.imperial-tourmate .profile-identity {color:#f9d69e}
+.imperial-tourmate .mobile-history {color:#f1d2a5}
+.imperial-tourmate .mobile-new-trip {color:#f1d2a5}
+
+/* Fine-paper landscape, including ongoing chat (not only the welcome screen). */
+.imperial-tourmate .conversation {
+  background:
+    radial-gradient(ellipse at 95% 10%,#f4dcbd50,transparent 48%),
+    radial-gradient(ellipse at 4% 98%,#f9dfba76,transparent 35%),
+    linear-gradient(165deg,#fff9ee,#faefdf 70%,#f3e2cd);
+  scrollbar-color:#d7b488 transparent;
+}
+.imperial-tourmate .conversation.has-messages {
+  background:
+    radial-gradient(ellipse at 100% 75%,#c5b79e24,transparent 40%),
+    repeating-linear-gradient(90deg,transparent 0 80px,#a87d4c0a 80px 81px),
+    linear-gradient(170deg,#fff9ed,#f8ebd8 95%);
+}
+.imperial-tourmate .welcome-panel {
+  width:min(100%,1450px);
+  max-width:1450px;
+  min-height:0;
+  padding:20px clamp(15px,2vw,32px) 28px;
+}
+.imperial-tourmate .china-hero-stage {
+  height:clamp(238px,33vh,310px);
+  min-height:238px;
+  border-radius:16px;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 70% 38%,#f8dfb7ba,transparent 43%),
+    linear-gradient(180deg,#fcefdc 0%,#f5e2c3 67%,#eed9be 100%);
+  border:2px solid #ce9958;
+  box-shadow:0 12px 38px #80452021,inset 0 0 0 5px #fffbef9e;
+}
+.imperial-tourmate .china-hero-stage::before {
+  inset:7px;border-radius:9px;border:1px solid #b37c3e9a;z-index:7;
+}
+.imperial-tourmate .china-hero-stage::after {
+  inset:12px;border-color:#e9b66e66;border-radius:5px;z-index:7;
+}
+.imperial-hero-ornament {
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  overflow:hidden;
+}
+.imperial-hero-ornament svg {width:100%;height:100%;display:block}
+.imperial-tourmate .china-3d-experience {z-index:1}
+.imperial-tourmate .china-3d-world {opacity:.72;filter:saturate(.77) sepia(.14) contrast(.94)}
+.imperial-tourmate .china-3d-backplane {transform:translateZ(-85px) scale(1.16)}
+.imperial-tourmate .china-3d-foreground {opacity:.24}
+.imperial-tourmate .china-hero-content {
+  position:relative;z-index:6;
+  margin:-8px auto 0;
+  padding:15px 12px 35px;
+  max-width:770px;
+  pointer-events:none;
+  text-shadow:0 2px 9px #fff5e8b2;
+}
+.imperial-tourmate .china-hero-overline {
+  color:#986742;
+  font:650 10px/1.4 "Songti SC",STSong,serif;
+  letter-spacing:.19em;
+}
+.imperial-tourmate .china-hero-rule {background:linear-gradient(90deg,transparent,#ab653f)}
+.imperial-tourmate .china-hero-seal {
+  position:absolute;
+  top:56px;right:14%;
+  width:30px;height:35px;
+  margin:0;
+  border-color:#ad372b;
+  color:#a83429;
+  background:#fff7e1cb;
+  font-size:11px;
+  transform:rotate(-5deg);
+}
+.imperial-tourmate .china-hero-content h1 {flex-direction:column;gap:5px}
+.imperial-tourmate .china-hero-content .hero-en-title {
+  order:0;
+  margin:18px 0 0;
+  color:#6e1a16;
+  font:650 clamp(42px,5.3vw,70px)/1.05 Georgia,"Times New Roman",serif;
+  letter-spacing:-.055em;
+  text-shadow:0 2px 1px #fff7ecab;
+}
+.imperial-tourmate .china-hero-content .hero-cn-title {
+  order:1;
+  margin-top:6px;
+  color:#3a2b24;
+  font:600 clamp(22px,2.6vw,33px)/1.16 "Songti SC",STSong,"Noto Serif CJK SC",serif;
+  letter-spacing:.32em;
+  text-shadow:none;
+}
+.imperial-tourmate .china-hero-content .welcome-copy {
+  max-width:530px;
+  margin:10px auto 0;
+  color:#685244;
+  font:500 12px/1.65 -apple-system,BlinkMacSystemFont,sans-serif;
+  text-shadow:0 1px 6px #fff5e8;
+}
+.imperial-tourmate .china-hero-divider {display:none}
+.imperial-tourmate .china-3d-enter-control {
+  z-index:9;
+  left:18px;bottom:15px;
+  min-height:39px;
+  padding:5px 10px;
+  background:linear-gradient(120deg,#821e19,#ab4432);
+  border-color:#f0c284a0;
+  box-shadow:0 5px 15px #67261d52;
+}
+.imperial-tourmate .china-3d-enter-spark {width:26px;height:26px}
+.imperial-tourmate .china-3d-view-control {
+  z-index:9;
+  right:17px;bottom:15px;
+  padding:6px 10px;
+  color:#632a22;
+  background:#fff0d1ed;
+  border-color:#ae7448;
+}
+/* Destination postcards are genuine travel prompts with distinct original art. */
+.imperial-tourmate .china-journey-heading {
+  margin:19px 0 12px;
+  flex-direction:row;
+  align-items:center;
+}
+.imperial-tourmate .china-journey-eyebrow {
+  position:relative;
+  display:flex;align-items:center;gap:13px;
+  color:#5a2924;
+  font:600 clamp(17px,1.9vw,23px)/1.3 "Songti SC",STSong,Georgia,serif;
+  letter-spacing:0;
+  text-transform:none;
+}
+.imperial-tourmate .china-journey-eyebrow::before {content:"☁";color:#bd8149;font-size:24px}
+.imperial-tourmate .china-journey-heading p {color:#8d725b;font-size:11px}
+.imperial-tourmate .suggestion-grid {gap:14px}
+.imperial-tourmate .suggestion-card {
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:172px;
+  padding:17px 17px 15px;
+  border:2px solid #daa65e;
+  border-radius:12px;
+  background:#82221d;
+  color:#fff3d5;
+  box-shadow:0 6px 0 #fdf1e1a8,0 10px 22px #6c341b25;
+  transform-style:preserve-3d;
+  will-change:auto;
+}
+.imperial-tourmate .imperial-destination-art {
+  position:absolute;
+  width:100%;height:100%;
+  inset:0;z-index:0;
+  object-fit:cover;
+  pointer-events:none;
+  transition:transform .6s ease,filter .6s ease;
+}
+.imperial-tourmate .suggestion-card::before {
+  content:"";
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,#6f1412eb 0%,#73201bcc 45%,#6c160f10 95%);
+  border-radius:inherit;
+  opacity:1;
+  transform:translateZ(2px);
+}
+.imperial-tourmate .suggestion-card:nth-child(2) {background:#e3d4a6;color:#3d2d27;border-color:#b5a474}
+.imperial-tourmate .suggestion-card:nth-child(2)::before {
+  background:linear-gradient(90deg,#f6ead5f0,#f6ead5bd 39%,#e2e4cb1c 96%);
+}
+.imperial-tourmate .suggestion-card:nth-child(3)::before {
+  background:linear-gradient(90deg,#651a13ee,#723120b9 48%,#713d2914);
+}
+.imperial-tourmate .suggestion-card:hover {border-color:#f2c17b;box-shadow:0 20px 39px #672a202f}
+.imperial-tourmate .suggestion-card:hover .imperial-destination-art {transform:scale(1.07);filter:saturate(1.14)}
+.imperial-tourmate .suggestion-card .suggestion-number {position:relative;z-index:2;transform:translateZ(18px)}
+.imperial-tourmate .suggestion-card .suggestion-index {color:#f0c17e;font:12px Georgia,serif}
+.imperial-tourmate .suggestion-card:nth-child(2) .suggestion-index {color:#8d5c3e}
+.imperial-tourmate .suggestion-card .suggestion-chop {
+  width:31px;height:31px;
+  background:linear-gradient(130deg,#b44934,#88271d);
+  border:1px solid #f2c284;
+  border-radius:5px;
+  color:#f8e8bf;
+  transform:translateZ(27px) rotate(-5deg);
+}
+.imperial-tourmate .suggestion-card strong {
+  position:relative;z-index:2;
+  grid-column:1/-1;
+  margin-top:12px;
+  color:inherit;
+  font:600 clamp(18px,1.7vw,23px)/1.12 "Songti SC",STSong,Georgia,serif;
+  text-shadow:0 1px 5px #3e170e32;
+  transform:translateZ(18px);
+}
+.imperial-tourmate .suggestion-card > span:last-of-type {
+  position:relative;z-index:2;
+  color:#f4d5ad;
+  margin-top:6px;
+  font-size:11px;
+  transform:translateZ(18px);
+}
+.imperial-tourmate .suggestion-card:nth-child(2)>span:last-of-type {color:#645340}
+.imperial-tourmate .suggestion-card i {
+  position:relative;z-index:2;align-self:end;
+  width:29px;height:29px;
+  display:grid;place-items:center;
+  border:1px solid #eac085;
+  border-radius:50%;
+  background:linear-gradient(#f8dfaa,#dda86a);
+  color:#6b251b;
+  box-shadow:0 3px 9px #30190d42;
+  font-size:15px;
+  transform:translateZ(24px);
+}
+.imperial-tourmate .suggestion-card:hover i {transform:translateZ(24px) translateX(2px)}
+.imperial-tourmate .tool-strip {
+  justify-content:flex-start;
+  padding:12px 0 0;
+  gap:9px;
+}
+.imperial-tourmate .tool-strip button {
+  color:#6c3924;
+  background:#fff8eb;
+  border:1px solid #dcb788;
+  border-radius:99px;
+  box-shadow:0 3px 11px #8d551914;
+  font-size:11px;
+  padding:8px 13px;
+}
+.imperial-tourmate .tool-strip button:hover:not(:disabled) {background:#f5e2bf;border-color:#bd874a}
+.imperial-tourmate .tool-strip .export-trip-button {
+  color:#ffeed4;
+  background:linear-gradient(125deg,#791f1a,#a44832);
+  border-color:#c48a51;
+  box-shadow:0 5px 16px #7431203a;
+}
+.imperial-tourmate .refinement-label {color:#935f38}
+
+/* A conversation is a travel journal, not an anonymous message list. */
+.imperial-tourmate .message-list {max-width:1040px;padding:23px 34px 34px}
+.imperial-tourmate .imperial-chat-heading {
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;align-items:center;gap:15px;
+  min-height:83px;
+  margin:0 0 25px;
+  padding:15px 18px;
+  border:1px solid #e4caa4;
+  border-radius:12px;
+  color:#622b20;
+  background:
+    radial-gradient(circle at 95% 20%,#f0d2acb8,transparent 36%),
+    linear-gradient(110deg,#fff4df,#f6e7cd);
+  box-shadow:0 7px 20px #82512d15;
+}
+.imperial-tourmate .imperial-chat-heading .china-landscape {
+  inset:-130px 0 -80px 22%;
+  z-index:0;
+  opacity:.23;
+  filter:saturate(.7) sepia(.2);
+  pointer-events:none;
+}
+.imperial-tourmate .imperial-chat-heading > :not(.china-landscape) {position:relative;z-index:1}
+.imperial-tourmate .imperial-chat-heading-seal {
+  display:grid;place-items:center;
+  flex:0 0 45px;width:45px;height:45px;
+  border:1px solid #ebbd79;
+  border-radius:6px 2px 6px 2px;
+  background:#9f3428;
+  color:#ffebc4;
+  box-shadow:inset 0 0 0 3px #f9d18b27;
+  transform:rotate(-5deg);
+  font:26px "Songti SC",STSong,serif;
+}
+.imperial-tourmate .imperial-chat-eyebrow {
+  display:block;margin-bottom:3px;
+  font-size:9px;font-weight:800;letter-spacing:.16em;color:#ab7955;
+}
+.imperial-tourmate .imperial-chat-heading h2 {
+  margin:0;color:#68241b;
+  font:600 clamp(18px,2.3vw,27px)/1.2 "Songti SC",STSong,Georgia,serif;
+}
+.imperial-tourmate .imperial-chat-heading-art {
+  margin-left:auto;
+  color:#c18f57;font:18px "Songti SC",STSong,serif;letter-spacing:.1em;
+}
+.imperial-tourmate .message-row {margin-bottom:24px;animation:message-unfold .42s both}
+.imperial-tourmate .message-column {max-width:min(790px,88%)}
+.imperial-tourmate .assistant-avatar {
+  width:40px;height:40px;
+  border-radius:50%;
+  color:#fff0ca;
+  background:radial-gradient(circle at 30% 24%,#c65a36,#7a1a17);
+  border:2px solid #e6b16c;
+  box-shadow:0 3px 0 #f7e3c3,0 8px 16px #7b321927;
+  transform:none;font:24px "Songti SC",STSong,serif;
+}
+.imperial-tourmate .message-bubble {border-radius:15px;padding:16px 19px;line-height:1.68;font-size:13px}
+.imperial-tourmate .assistant-bubble {
+  border:1px solid #e2c09b;
+  background:linear-gradient(125deg,#fff9ed,#faeacf);
+  color:#402b23;
+  box-shadow:0 5px 20px #7d481b16;
+}
+.imperial-tourmate .assistant-bubble::before {
+  background:#c3925b;height:26px;top:16px;opacity:.7;
+}
+.imperial-tourmate .user-bubble {
+  border:1px solid #ac6044;
+  border-radius:16px 16px 4px 16px;
+  color:#fff8e9;
+  background:linear-gradient(125deg,#8f1e1b,#741512);
+  box-shadow:0 9px 23px #781e182b;
+}
+.imperial-tourmate .message-time {color:#9d856f}
+.imperial-tourmate .grounded-label {background:#f1e6cf;color:#74552b}
+.imperial-tourmate .safety-badge {border:1px solid #e1bd88;background:#f8ebd4;color:#825325}
+.imperial-tourmate .copy-button {color:#8d6e52}
+.imperial-tourmate .copy-button:hover {color:#9d3c2f}
+.imperial-tourmate .trust-passport {
+  background:#fff7e8d9;
+  border:1px solid #e5c397;
+  color:#81532f;border-radius:9px;
+}
+.imperial-tourmate .trust-passport summary:hover {color:#9e3f2e}
+.imperial-tourmate .sources-card {border-left:3px solid #bc8c4f;background:#f8ebd5}
+.imperial-tourmate .source-links a {background:#fff8e8;border-color:#dfbd94;color:#7e4b2c}
+.imperial-tourmate .typing-bubble {background:#fffaed;border-color:#e9ca9a}
+.imperial-tourmate .typing-bubble span {background:#ad4d35}
+.imperial-tourmate .typing-bubble em {color:#966e49}
+
+/* Gilded chat composer: accessible, readable and always usable. */
+.imperial-tourmate .composer-area {
+  position:relative;
+  padding:10px clamp(13px,2.3vw,32px) 12px;
+  border-top:1px solid #d9ad76b8;
+  background:
+    linear-gradient(180deg,#f9eddd98,#f6e7d4 70%,#f2dfc6);
+}
+.imperial-tourmate .composer {
+  max-width:1040px;
+  min-height:68px;
+  padding:11px 11px 9px 18px;
+  border:2px solid #c9954f;
+  border-radius:13px;
+  background:linear-gradient(120deg,#fffaf1,#fef6e8);
+  box-shadow:inset 0 0 0 2px #f8e4c2,0 9px 24px #71442522;
+}
+.imperial-tourmate .composer::before {
+  content:"";
+  position:absolute;
+  width:15px;height:15px;
+  left:7px;top:6px;
+  border-left:1px solid #ac7441;
+  border-top:1px solid #ac7441;
+  border-radius:1px;
+  pointer-events:none;
+  opacity:.45;
+}
+.imperial-tourmate .composer:focus-within {border-color:#a65d33;box-shadow:0 0 0 3px #d5a5643d,0 12px 30px #78432625}
+.imperial-tourmate .composer textarea {color:#452923;font-size:13px}
+.imperial-tourmate .composer textarea::placeholder {color:#a68c72}
+.imperial-tourmate .character-count {color:#a98c70}
+.imperial-tourmate .send-button {
+  width:43px;height:43px;
+  border:1px solid #c38f56;
+  border-radius:10px;
+  color:#fff3dc;
+  background:linear-gradient(130deg,#aa3c2b,#741b17);
+  box-shadow:0 4px 12px #8427194a,inset 0 1px #e2b27e66;
+}
+.imperial-tourmate .send-button:hover:not(:disabled) {background:linear-gradient(#bf5138,#89241e);transform:translateY(-2px)}
+.imperial-tourmate .composer-note {max-width:1030px;color:#8a725d}
+.imperial-tourmate .error-banner {max-width:1040px}
+.imperial-tourmate .history-notice {max-width:1040px}
+.imperial-tourmate .auth-wrap {
+  background:
+    radial-gradient(circle at 10% 10%,#ebca9f73,transparent 35%),
+    radial-gradient(circle at 94% 88%,#d8b28d66,transparent 38%),
+    linear-gradient(150deg,#fff7eb,#f3e2c8);
+}
+.imperial-tourmate .auth-card {
+  background:#fff8e9;
+  border:2px solid #c89857;
+  border-radius:14px;
+  box-shadow:0 20px 57px #6f3f252b,inset 0 0 0 4px #fbeace;
+}
+.imperial-tourmate .auth-mark {background:#a33b2e;color:#fff2d2;border-color:#d6a166}
+.imperial-tourmate .auth-card h1 {color:#782c24}
+.imperial-tourmate .auth-card .section-kicker {color:#af814d}
+.imperial-tourmate .auth-form label span {color:#764a32}
+.imperial-tourmate .auth-form input {background:#fffdf6;border-color:#dabb90;color:#4e2921}
+.imperial-tourmate .auth-form input:focus {border-color:#af6d40;box-shadow:0 0 0 3px #d9b27b55}
+.imperial-tourmate .primary-button {background:linear-gradient(115deg,#a53c2e,#78201c);border:1px solid #cb8a56}
+.imperial-tourmate .primary-button:hover:not(:disabled) {background:#90271f}
+.imperial-tourmate .auth-switch button {color:#a23f31}
+
+/* Quick, tactile motion; less reflow and no unnecessary full-screen animations. */
+@keyframes imperial-gold-glint {
+  from {background-position:120% 0}
+  to {background-position:-120% 0}
+}
+.imperial-tourmate .imperial-side-menu button:active,
+.imperial-tourmate .imperial-topnav button:active,
+.imperial-tourmate .suggestion-card:active {scale:.985}
+
+/* Progressive layout adapts without wrapping/overlapping navigation or composer. */
+@media(max-width:1460px) {
+  .imperial-tourmate .imperial-topnav {gap:3px}
+  .imperial-tourmate .imperial-topnav button {padding:7px 9px;font-size:11px;gap:6px}
+  .imperial-tourmate .imperial-nav-divider {height:15px}
+  .imperial-tourmate .service-pill {font-size:9px}
+}
+@media(max-width:1180px) {
+  .imperial-tourmate .topbar {padding-inline:14px}
+  .imperial-tourmate .imperial-topnav button {padding:7px 8px}
+  .imperial-tourmate .imperial-topnav button svg {width:15px;height:15px}
+  .imperial-tourmate .service-pill {display:none}
+  .imperial-tourmate .china-hero-stage {height:270px}
+  .imperial-tourmate .china-hero-content .hero-en-title {font-size:51px}
+}
+@media(max-width:900px) {
+  .imperial-tourmate .topbar {gap:7px}
+  .imperial-tourmate .imperial-topnav {gap:0}
+  .imperial-tourmate .imperial-topnav button {font-size:10px;padding:7px 6px}
+  .imperial-tourmate .imperial-nav-divider {margin-inline:2px}
+  .imperial-tourmate .suggestion-grid {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .imperial-tourmate .suggestion-card {min-height:150px;padding:12px}
+  .imperial-tourmate .suggestion-card strong {font-size:17px}
+  .imperial-tourmate .china-journey-heading {gap:10px}
+  .imperial-tourmate .china-journey-heading p {display:none}
+}
+@media(max-width:720px) {
+  .imperial-tourmate .sidebar {padding:21px 17px 18px}
+  .imperial-tourmate .imperial-topnav {display:none}
+  .imperial-tourmate .topbar {height:61px;padding-inline:12px;gap:11px}
+  .imperial-tourmate .mobile-brand .brand-symbol {width:35px;height:35px}
+  .imperial-tourmate .mobile-brand .brand-name {font-size:21px;color:#f7d9a7}
+  .imperial-tourmate .mobile-history {color:#ffe2ab}
+  .imperial-tourmate .mobile-new-trip {color:#ffe2ab}
+  .imperial-tourmate .topbar-actions {margin-left:auto}
+  .imperial-tourmate .signout-button span {display:none}
+  .imperial-tourmate .welcome-panel {padding:12px 12px 23px}
+  .imperial-tourmate .china-hero-stage {min-height:285px;height:285px;border-radius:12px}
+  .imperial-tourmate .china-hero-content {margin-top:3px;padding:18px 15px 48px}
+  .imperial-tourmate .china-hero-overline {font-size:8px;letter-spacing:.1em}
+  .imperial-tourmate .china-hero-content .hero-en-title {font-size:clamp(37px,10vw,52px);margin-top:15px}
+  .imperial-tourmate .china-hero-content .hero-cn-title {font-size:22px;letter-spacing:.22em}
+  .imperial-tourmate .china-hero-content .welcome-copy {font-size:10px;max-width:280px}
+  .imperial-tourmate .china-hero-seal {top:48px;right:7%;scale:.77}
+  .imperial-tourmate .china-3d-enter-control {left:10px;bottom:9px;font-size:9px;min-height:34px;padding:4px 7px}
+  .imperial-tourmate .china-3d-view-control {right:9px;bottom:9px;font-size:9px;padding:4px 7px}
+  .imperial-tourmate .china-journey-heading {margin:17px 0 11px}
+  .imperial-tourmate .china-journey-eyebrow {font-size:17px}
+  .imperial-tourmate .suggestion-grid {grid-template-columns:1fr;gap:9px}
+  .imperial-tourmate .suggestion-card {min-height:132px;padding:12px 16px}
+  .imperial-tourmate .suggestion-card strong {font-size:21px;margin-top:2px}
+  .imperial-tourmate .suggestion-card > span:last-of-type {font-size:11px}
+  .imperial-tourmate .imperial-destination-art {height:100%}
+  .imperial-tourmate .tool-strip {gap:7px}
+  .imperial-tourmate .message-list {padding:18px 12px 24px}
+  .imperial-tourmate .imperial-chat-heading {padding:12px;gap:11px;min-height:70px}
+  .imperial-tourmate .imperial-chat-heading-seal {width:35px;height:35px;flex-basis:35px;font-size:22px}
+  .imperial-tourmate .imperial-chat-heading h2 {font-size:18px}
+  .imperial-tourmate .imperial-chat-heading-art {display:none}
+  .imperial-tourmate .message-column {max-width:89%}
+  .imperial-tourmate .message-bubble {padding:12px 14px;font-size:12px}
+  .imperial-tourmate .composer-area {padding:8px 9px 10px}
+  .imperial-tourmate .composer {min-height:61px;padding:8px 8px 8px 15px}
+  .imperial-tourmate .send-button {height:38px;width:38px}
+}
+@media(max-width:390px) {
+  .imperial-tourmate .china-hero-content .hero-en-title {font-size:36px}
+  .imperial-tourmate .china-hero-overline {letter-spacing:0}
+  .imperial-tourmate .china-3d-view-control span:last-child {display:none}
+  .imperial-tourmate .language-toggle button {padding-inline:6px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .imperial-tourmate *, .imperial-tourmate *::before, .imperial-tourmate *::after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}

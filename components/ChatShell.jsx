@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AuthPanel from "./AuthPanel.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
 import China3DScene from "./China3DScene.jsx";
+import ChinaWorldExplorer from "./ChinaWorldExplorer.jsx";
+import ChinaDestinationArt from "./ChinaDestinationArt.jsx";
+import ChinaHeroOrnament from "./ChinaHeroOrnament.jsx";
 import { applyCardDepth, resetCardDepth } from "../lib/client/visual-depth.js";
 import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
@@ -23,9 +26,9 @@ import {
 
 const text = {
   en: {
-    brandTag: "东方风物 · EXPLORE CHINA",
-    newTrip: "New trip",
-    recent: "CURRENT TRIPS",
+    brandTag: "山海行记 · EXPLORE CHINA",
+    newTrip: "New chat",
+    recent: "TRIP HISTORY",
     untitledTrip: "New trip",
     tripNavigation: "Saved trips",
     openTrips: "Open trips",
@@ -48,9 +51,9 @@ const text = {
     retry: "Try again",
     welcomeKicker: "YOUR CHINA TRAVEL COMPANION",
     welcomeTitle: "A thousand journeys. One unforgettable China.",
-    welcomeBody: "From misty mountain towns to lantern-lit streets, let your AI travel companion plan a journey that feels like yours.",
+    welcomeBody: "Your AI travel companion for a deeper, more personal China journey.",
     composerLabel: "Ask TourMate",
-    placeholder: "Ask about travel in China…",
+    placeholder: "Ask me anything about travelling in China…",
     send: "Send message",
     stop: "Stop response",
     enterHint: "Enter to send · Shift + Enter for a new line",
@@ -85,15 +88,15 @@ const text = {
       { key: "heritage_choice", title: "Heritage choice", prompt: "Show West Lake vs Grand Canal choice card" }
     ],
     suggestions: [
-      { title: "The imperial route", body: "Four unforgettable days in Beijing", prompt: "Plan a 4-day 3-night Beijing trip with temples, old neighborhoods and a Great Wall day trip." },
-      { title: "Misty Hangzhou", body: "Lakes, tea hills and slow mornings", prompt: "Plan a beautiful and relaxed 2-day itinerary for Hangzhou including West Lake, tea villages and local cultural experiences." },
-      { title: "Hidden heritage", body: "The quieter side of China", prompt: "Recommend underrated heritage towns and memorable cultural experiences in China for a first-time traveler." }
+      { title: "Imperial Beijing", body: "Palaces · History · Culture", prompt: "Plan a 4-day 3-night Beijing trip with temples, old neighborhoods and a Great Wall day trip." },
+      { title: "Misty Hangzhou", body: "Lakes · Gardens · Poetry", prompt: "Plan a beautiful and relaxed 2-day itinerary for Hangzhou including West Lake, tea villages and local cultural experiences." },
+      { title: "Ancient Heritage", body: "Old towns · Silk Road · Culture", prompt: "Recommend underrated heritage towns and memorable cultural experiences in China for a first-time traveler." }
     ]
   },
   zh: {
     brandTag: "AI 智能旅行伴侣",
-    newTrip: "新行程",
-    recent: "所有行程",
+    newTrip: "新对话",
+    recent: "旅途记录",
     untitledTrip: "新行程",
     tripNavigation: "已保存行程",
     openTrips: "打开行程列表",
@@ -163,6 +166,11 @@ const text = {
 function Icon({ name, size = 20 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
   if (name === "plus") return <svg {...common}><path d="M12 5v14M5 12h14" /></svg>;
+  if (name === "home") return <svg {...common}><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg>;
+  if (name === "calendar") return <svg {...common}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>;
+  if (name === "compass") return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.4 4.6-4.6 2.4 2.4-4.6 4.6-2.4Z"/></svg>;
+  if (name === "book") return <svg {...common}><path d="M12 6C9 4 6 4 3 5v14c4-2 6-2 9 0 3-2 5-2 9 0V5c-3-1-6-1-9 1Zm0 0v13"/></svg>;
+  if (name === "history") return <svg {...common}><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>;
   if (name === "menu") return <svg {...common}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
   if (name === "close") return <svg {...common}><path d="m6 6 12 12M18 6 6 18" /></svg>;
   if (name === "send") return <svg {...common}><path d="m21 3-7.5 18-4.2-7.8L3 9l18-6Z" /><path d="m9.3 13.2 4.2-4.2" /></svg>;
@@ -267,6 +275,8 @@ export default function ChatShell() {
   const [session, setSession] = useState(null);
   const [copied, setCopied] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [navExplorerOpen, setNavExplorerOpen] = useState(false);
+  const navExplorerRef = useRef(null);
   const endRef = useRef(null);
   const textareaRef = useRef(null);
   const requestsRef = useRef(new Map());
@@ -512,6 +522,12 @@ export default function ChatShell() {
     }
   }
 
+  function closeNavExplorer(restoreFocus = true) {
+    setNavExplorerOpen(false);
+    if (restoreFocus && typeof window !== "undefined")
+      window.requestAnimationFrame(() => navExplorerRef.current?.focus());
+  }
+
   function chooseSuggestion(prompt) {
     setDraft(prompt);
     setError("");
@@ -627,7 +643,7 @@ export default function ChatShell() {
   ];
 
   return (
-    <div className="app-shell grid min-h-dvh grid-cols-[288px_minmax(0,1fr)] max-[900px]:grid-cols-[235px_minmax(0,1fr)] max-[720px]:block">
+    <div className="app-shell imperial-tourmate grid min-h-dvh grid-cols-[310px_minmax(0,1fr)] max-[900px]:grid-cols-[245px_minmax(0,1fr)] max-[720px]:block">
       {sidebarOpen && <button className="sidebar-backdrop" type="button" aria-label={t.closeTrips} onClick={() => { setSidebarOpen(false); historyButtonRef.current?.focus(); }} />}
       <aside id="trips-sidebar" ref={sidebarRef} className={`sidebar ${sidebarOpen ? "is-open" : ""}`} aria-label={t.tripNavigation}>
         <div className="sidebar-brand-row">
@@ -642,7 +658,25 @@ export default function ChatShell() {
         <button className="new-trip-button" type="button" onClick={startNewTrip} disabled={!history.ready}>
           <Icon name="plus" size={19} />{t.newTrip}
         </button>
-        <nav className="trip-list" aria-label={t.tripNavigation}>
+        {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
+          <nav className="imperial-side-menu" aria-label={language === "zh" ? "旅行导航" : "Travel navigation"}>
+            <button type="button" onClick={startNewTrip} disabled={!history.ready}>
+              <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
+            </button>
+            <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
+              <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}
+            </button>
+            <button type="button" onClick={() => chooseSuggestion(language === "zh"
+              ? "请根据我的兴趣推荐中国独特的文化旅行灵感和目的地。"
+              : "Give me inspiring China travel destination ideas, including unique cultural experiences.")}>
+              <Icon name="spark" size={17}/>{language === "zh" ? "旅行灵感" : "Travel inspiration"}
+            </button>
+            <button type="button" onClick={() => document.getElementById("trips-sidebar-history")?.scrollIntoView({behavior:"smooth",block:"nearest"})}>
+              <Icon name="history" size={17}/>{language === "zh" ? "我的行程" : "My trips"}
+            </button>
+          </nav>
+        )}
+        <nav id="trips-sidebar-history" className="trip-list" aria-label={t.tripNavigation}>
           <p className="sidebar-label">{t.recent}</p>
           <div className="trip-scroll">
           {trips.map((trip) => <button key={trip.id} type="button" data-trip-id={trip.id}
@@ -675,6 +709,23 @@ export default function ChatShell() {
           <button className="mobile-new-trip" type="button" onClick={startNewTrip} disabled={!history.ready} aria-label={t.newTrip}>
             <Icon name="plus" size={19} />
           </button>
+          {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
+            <nav className="imperial-topnav" aria-label={language === "zh" ? "主导航" : "Main navigation"}>
+              <button type="button" className="imperial-nav-active"
+                onClick={() => textareaRef.current?.focus()}><Icon name="spark" size={17}/>{language === "zh" ? "AI 旅行对话" : "AI Travel Chat"}</button>
+              <span aria-hidden="true" className="imperial-nav-divider"/>
+              <button type="button" onClick={startNewTrip} disabled={!history.ready}>
+                <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a Trip"}</button>
+              <span aria-hidden="true" className="imperial-nav-divider"/>
+              <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
+                <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}</button>
+              <span aria-hidden="true" className="imperial-nav-divider"/>
+              <button type="button" onClick={() => chooseSuggestion(language === "zh"
+                ? "请分享在中国旅行时实用的交通、支付、礼仪和预订小贴士。"
+                : "Share practical travel tips for China, including transport, payments, local etiquette, and what to verify before booking.")}>
+                <Icon name="book" size={17}/>{language === "zh" ? "旅行贴士" : "Travel Tips"}</button>
+            </nav>
+          )}
           <div className="service-pill"><span className={`status-dot ${service.state}`} />{statusLabel}</div>
           {persona?.id === DEFAULT_PERSONA_ID && <div className="topbar-poem" aria-hidden="true"><span className="topbar-poem-mark">山</span><span>云游四方 · 风雅中国</span></div>}
           {persona && <span className="profile-identity" title={`${t.profileVersion} ${persona.version}`}>{personaName}</span>}
@@ -721,12 +772,13 @@ export default function ChatShell() {
               ) : messages.length === 0 ? (
                 <div className="welcome-panel">
                   {persona?.id === DEFAULT_PERSONA_ID ? (
-                    <div className="china-hero-stage">
+                    <div className="china-hero-stage imperial-hero">
+                      <ChinaHeroOrnament />
                       <China3DScene language={language} onExplorePrompt={chooseSuggestion}><ChinaLandscape /></China3DScene>
                       <div className="china-hero-content">
                         <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
                         <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
-                        <h1><span className="hero-cn-title">山海之间</span><span className="hero-en-title">{language === "zh" ? "遇见你的中国" : "Find your China."}</span></h1>
+                        <h1><span className="hero-en-title">{language === "zh" ? "遇见你的中国" : "Find your China."}</span><span className="hero-cn-title">山海之间</span></h1>
                         <p className="welcome-copy">{t.welcomeBody}</p>
                         <div className="china-hero-divider" aria-hidden="true"><span />✧<span /></div>
                       </div>
@@ -739,11 +791,12 @@ export default function ChatShell() {
                       <p className="welcome-copy">{persona?.greeting[language] || t.welcomeBody}</p>
                     </div>
                   )}
-                  {persona?.id === DEFAULT_PERSONA_ID && <div className="china-journey-heading"><span className="china-journey-eyebrow">启程 · BEGIN YOUR JOURNEY</span><p>{language === "zh" ? "选一个故事开始，或写下你心中的目的地" : "Pick a path to begin, or tell us where your heart wants to go."}</p></div>}
+                  {persona?.id === DEFAULT_PERSONA_ID && <div className="china-journey-heading"><span className="china-journey-eyebrow">{language === "zh" ? "启程 · 寻找你的下一段故事" : "Get inspired for your next journey"}</span><p>{language === "zh" ? "选一个故事开始，或写下你心中的目的地" : "Explore somewhere extraordinary."}</p></div>}
                   <div className="suggestion-grid grid grid-cols-3 gap-3 text-left max-[900px]:grid-cols-1">
                     {suggestions.map((suggestion, index) => (
                       <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}
                         onPointerMove={applyCardDepth} onPointerLeave={resetCardDepth} onBlur={resetCardDepth}>
+                        {persona?.id === DEFAULT_PERSONA_ID && <ChinaDestinationArt index={index}/>}
                         <span className="suggestion-number"><span className="suggestion-index">0{index + 1}</span><span className="suggestion-chop" aria-hidden="true">{["京","杭","古"][index]}</span></span>
                         <strong>{suggestion.title}</strong>
                         <span>{suggestion.body}</span>
@@ -761,6 +814,15 @@ export default function ChatShell() {
                 </div>
               ) : (
                 <div className="message-list" aria-live="polite">
+                  {persona?.id === DEFAULT_PERSONA_ID && (
+                    <div className="imperial-chat-heading">
+                      <ChinaLandscape />
+                      <span className="imperial-chat-heading-seal" aria-hidden="true">旅</span>
+                      <div><span className="imperial-chat-eyebrow">{language === "zh" ? "山海行记 · AI 旅伴" : "THE JOURNEY CONTINUES"}</span>
+                      <h2>{activeTrip?.title || (language === "zh" ? "我的中国之旅" : "Your China travel story")}</h2></div>
+                      <span className="imperial-chat-heading-art" aria-hidden="true">云 · 山 · 水</span>
+                    </div>
+                  )}
                   {messages.map((message) => <Message key={message.id} message={message} language={language} copied={copied} onCopy={copyMessage} avatar={avatar} />)}
                   {pending && (
                     <div className="message-row assistant-row" role="status">
@@ -833,6 +895,10 @@ export default function ChatShell() {
           </div>
         )}
       </main>
+      {navExplorerOpen && persona?.id === DEFAULT_PERSONA_ID && (
+        <ChinaWorldExplorer language={language} onClose={closeNavExplorer}
+          onSelectPrompt={chooseSuggestion}/>
+      )}
     </div>
   );
 }
