@@ -37,7 +37,7 @@ test("chat opens an immersive bilingual hero but keeps custom museum persona gre
   assert.match(ui,/downloadTravelPlan/);
   assert.match(ui,/submitMessage/);
   assert.match(ui,/onClick=\{startNewTrip\}/);
-  assert.match(ui,/onClick=\{changeLanguage\("zh"\)\}/);
+  assert.match(ui,/onClick=\{\(\) => changeLanguage\("zh"\)\}/);
 });
 
 test("theme contains well-defined animations, responsive breakpoints and low-motion alternative",async()=>{
