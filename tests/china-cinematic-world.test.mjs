@@ -23,6 +23,7 @@ test("immersive view is keyboard accessible, locks scroll, closes on Escape and 
   assert.match(modal,/aria-modal="true"/);
   assert.match(modal,/aria-labelledby="cinematic-title"/);
   assert.match(modal,/closeRef\.current\?\.focus\(\)/);
+  assert.match(modal,/active\.current = true/);
   assert.match(modal,/document\.body\.style\.overflow = "hidden"/);
   assert.match(modal,/document\.body\.style\.overflow=oldOverflow/);
   assert.match(modal,/event\.key==="Escape"/);
@@ -66,6 +67,8 @@ test("golden-hour and night lighting actually change scene, moon, stars and pago
   }
   assert.match(css,/transform:translateZ\(140px\) rotateY\(-16deg\)/);
   assert.match(css,/transform:translateZ\(-75px\) scale\(1\.12\)/);
+  assert.match(css,/\.cinematic-sky::after/);
+  assert.match(css,/\.cinematic-overlay\[data-atmosphere="night"\] \.cinematic-sky::after \{opacity:1\}/);
 });
 
 test("orbit movement uses raf, clamps angles and updates zoom without paid inference",async()=>{
@@ -95,6 +98,7 @@ test("visual improvements are opt-in, progressive and preserve accessibility fal
   assert.ok(layout.includes('import "./china-cinematic.css";'));
   assert.ok(layout.indexOf('import "./china-cinematic.css";')>layout.indexOf('import "./china-3d.css";'));
   assert.match(css,/@media\(max-width:720px\)/);
+  assert.match(css,/\.cinematic-petals span:nth-child\(n\+7\) \{display:none\}/);
   assert.match(css,/@media\(hover:none\), \(pointer:coarse\)/);
   assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
   assert.match(css,/\.cinematic-petals \{display:none\}/);
