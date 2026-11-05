@@ -21,7 +21,8 @@ test("all visible main navigation controls actually do something",async()=>{
   assert.match(ui,/className="imperial-side-menu"/);
   assert.match(ui,/className="imperial-topnav"/);
   assert.match(ui,/onClick=\{startNewTrip\}/);
-  assert.match(ui,/onClick=\{\(\) => setNavExplorerOpen\(true\)\}/);
+  assert.match(ui,/navExplorerRef\.current = event\.currentTarget; setNavExplorerOpen\(true\)/);
+  assert.match(ui,/navExplorerRef\.current\?\.focus\(\)/);
   assert.match(ui,/onClick=\{\(\) => chooseSuggestion\(language === "zh"/);
   assert.match(ui,/document\.getElementById\("trips-sidebar-history"\)/);
   assert.match(ui,/onClick=\{\(\) => textareaRef\.current\?\.focus\(\)\}/);
