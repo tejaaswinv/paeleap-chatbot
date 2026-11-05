@@ -103,10 +103,12 @@ export default function ChinaWorldExplorer({ language = "en", onClose, onSelectP
   }
   function rotate(direction) {
     setAngle(a=>clamp(a+direction*18,-54,54));
-    if(worldRef.current) {
-      worldRef.current.style.setProperty("--cinematic-tilt-y",clamp(angle+direction*18,-54,54)+"deg");
-    }
   }
+  useEffect(()=>{
+    if(!worldRef.current)return;
+    worldRef.current.style.setProperty("--cinematic-tilt-y",(mouseRef.current.x*13+angle).toFixed(2)+"deg");
+  },[angle]);
+
   function choose(stop) {
     onSelectPrompt?.(zh?stop.questionZh:stop.questionEn);
     onClose(false);
@@ -155,7 +157,7 @@ export default function ChinaWorldExplorer({ language = "en", onClose, onSelectP
             <span className="cinematic-lotus lotus-three"/>
           </div>
           <div className="cinematic-petals" aria-hidden="true">
-            {Array.from({length:11},(_,i)=><span key={i} style={{"--petal-index":i}}/>)}
+            {Array.from({length:11},(_,i)=><span key={i} style={{left:(4+i*8.5)+"%",animationDelay:-(i%6)*2.3+"s"}}/>)}
           </div>
         </div>
 
