@@ -26,6 +26,7 @@ test("3D viewpoint control cycles three named angles without changing user promp
   assert.match(scene,/setView\(previous => \(previous \+ 1\) % VIEWS\.length\)/);
   assert.match(scene,/aria-label=\{language === "zh" \?/);
   assert.match(scene,/Rotate the 3D landscape view/);
+  assert.match(scene,/Rotate view/);
   assert.match(scene,/requestAnimationFrame\(paint\)/);
   assert.match(scene,/cancelAnimationFrame\(frameRef\.current\)/);
   assert.match(scene,/stage\.addEventListener\("pointermove"/);
@@ -81,7 +82,7 @@ test("3D augmentation leaves core TourMate controls and existing landscape intac
   const ui=await read("components/ChatShell.jsx");
   const layout=await read("app/layout.jsx");
   assert.match(ui,/import China3DScene from "\.\/China3DScene\.jsx"/);
-  assert.match(ui,/<China3DScene language=\{language\} onExplorePrompt=\{chooseSuggestion\}><ChinaLandscape \/><\/China3DScene>/);
+  assert.match(ui,/<China3DScene language=\{language\}><ChinaLandscape \/><\/China3DScene>/);
   assert.match(ui,/onPointerMove=\{applyCardDepth\}/);
   assert.match(ui,/onPointerLeave=\{resetCardDepth\}/);
   assert.match(ui,/onClick=\{\(\) => chooseSuggestion\(suggestion\.prompt\)\}/);

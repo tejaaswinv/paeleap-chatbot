@@ -1,13 +1,12 @@
 import "./globals.css";
 import "./china-theme.css";
 import "./china-3d.css";
-import "./china-cinematic.css";
 import "./imperial-tourmate.css";
 import "./tourmate-polish.css";
 
 export const metadata = {
   title: "Paeleap TourMate",
-  description: "Explore China with TourMate: your bilingual AI travel companion for unforgettable journeys.",
+  description: "Plan memorable journeys across China with TourMate, your bilingual AI travel companion.",
   applicationName: "Paeleap TourMate"
 };
 

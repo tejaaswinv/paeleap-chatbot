@@ -5,7 +5,6 @@ import AuthPanel from "./AuthPanel.jsx";
 import TravelMessage from "./TravelMessage.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
 import China3DScene from "./China3DScene.jsx";
-import ChinaWorldExplorer from "./ChinaWorldExplorer.jsx";
 import ChinaDestinationArt from "./ChinaDestinationArt.jsx";
 import ChinaHeroOrnament from "./ChinaHeroOrnament.jsx";
 import { applyCardDepth, resetCardDepth } from "../lib/client/visual-depth.js";
@@ -276,8 +275,6 @@ export default function ChatShell() {
   const [session, setSession] = useState(null);
   const [copied, setCopied] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [navExplorerOpen, setNavExplorerOpen] = useState(false);
-  const navExplorerRef = useRef(null);
   const endRef = useRef(null);
   const conversationRef = useRef(null);
   const pinnedToBottomRef = useRef(true);
@@ -542,12 +539,6 @@ export default function ChatShell() {
     }
   }
 
-  function closeNavExplorer(restoreFocus = true) {
-    setNavExplorerOpen(false);
-    if (restoreFocus && typeof window !== "undefined")
-      window.requestAnimationFrame(() => navExplorerRef.current?.focus());
-  }
-
   function onConversationScroll(event) {
     const container = event.currentTarget;
     const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 130;
@@ -701,9 +692,6 @@ export default function ChatShell() {
             <button type="button" onClick={startNewTrip} disabled={!history.ready}>
               <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
             </button>
-            <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
-              <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}
-            </button>
             <button type="button" onClick={() => chooseSuggestion(language === "zh"
               ? "请根据我的兴趣推荐中国独特的文化旅行灵感和目的地。"
               : "Give me inspiring China travel destination ideas, including unique cultural experiences.")}>
@@ -754,9 +742,6 @@ export default function ChatShell() {
               <span aria-hidden="true" className="imperial-nav-divider"/>
               <button type="button" onClick={startNewTrip} disabled={!history.ready}>
                 <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a Trip"}</button>
-              <span aria-hidden="true" className="imperial-nav-divider"/>
-              <button type="button" onClick={(event) => { navExplorerRef.current = event.currentTarget; setNavExplorerOpen(true); }}>
-                <Icon name="compass" size={17}/>{language === "zh" ? "探索中国" : "Explore China"}</button>
               <span aria-hidden="true" className="imperial-nav-divider"/>
               <button type="button" onClick={() => chooseSuggestion(language === "zh"
                 ? "请分享在中国旅行时实用的交通、支付、礼仪和预订小贴士。"
@@ -814,7 +799,7 @@ export default function ChatShell() {
                   {persona?.id === DEFAULT_PERSONA_ID ? (
                     <div className="china-hero-stage imperial-hero">
                       <ChinaHeroOrnament />
-                      <China3DScene language={language} onExplorePrompt={chooseSuggestion}><ChinaLandscape /></China3DScene>
+                      <China3DScene language={language}><ChinaLandscape /></China3DScene>
                       <div className="china-hero-content">
                         <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
                         <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
@@ -955,10 +940,6 @@ export default function ChatShell() {
           </div>
         )}
       </main>
-      {navExplorerOpen && persona?.id === DEFAULT_PERSONA_ID && (
-        <ChinaWorldExplorer language={language} onClose={closeNavExplorer}
-          onSelectPrompt={chooseSuggestion}/>
-      )}
     </div>
   );
 }
