@@ -1,7 +1,6 @@
 import "./globals.css";
 import "./china-theme.css";
 import "./china-3d.css";
-import "./china-cinematic.css";
 import "./imperial-tourmate.css";
 import "./tourmate-polish.css";
 
