@@ -1,0 +1,292 @@
+/*
+ * TourMate UX refinement — a calmer travel journal inside the imperial theme.
+ * No additional fonts/assets. Readability and small-screen controls take
+ * priority over decoration. Only applies to the TourMate chat shell.
+ */
+.imperial-tourmate .chat-layout {position:relative}
+.imperial-tourmate .message-list {
+  max-width:1080px;
+  padding-top:28px;
+  padding-bottom:38px;
+}
+.imperial-tourmate .message-row {
+  scroll-margin-block:28px;
+}
+.imperial-tourmate .assistant-bubble {
+  font-size:14px;
+  line-height:1.72;
+  padding:20px 23px;
+  border-radius:6px 18px 18px 18px;
+  box-shadow:0 4px 14px #73381b14,0 1px 0 #ffffffc5 inset;
+}
+.imperial-tourmate .user-bubble {
+  font-size:14px;
+  line-height:1.7;
+  padding:17px 20px;
+  border-radius:18px 18px 5px 18px;
+}
+.imperial-tourmate .assistant-row .message-column {max-width:min(850px,90%)}
+.imperial-tourmate .user-row .message-column {max-width:min(730px,84%)}
+.imperial-tourmate .assistant-bubble .travel-answer {
+  display:grid;
+  gap:13px;
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-wrap:pretty;
+}
+.imperial-tourmate .assistant-bubble .travel-prose {
+  margin:0;
+  font-size:13.5px;
+  line-height:1.78;
+  color:#4e392c;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
+}
+.imperial-tourmate .assistant-bubble .travel-answer strong {font-weight:750;color:#6a2921}
+.imperial-tourmate .assistant-bubble .travel-subheading {
+  margin:10px 0 1px;
+  padding:0 0 9px;
+  border-bottom:1px solid #ead2ae;
+  color:#7e2822;
+  font:650 clamp(15px,1.35vw,18px)/1.35 "Songti SC",STSong,Georgia,serif;
+}
+.imperial-tourmate .assistant-bubble .travel-day {
+  display:grid;
+  gap:4px;
+  margin-top:8px;
+  border:1px solid #e0c399;
+  border-radius:11px;
+  padding:12px 14px 13px;
+  background:
+    radial-gradient(circle at 100% 0%,#f2dbaf79,transparent 55%),
+    linear-gradient(110deg,#fff6e5,#faebd3);
+  box-shadow:inset 3px 0 0 #a74b32;
+}
+.imperial-tourmate .assistant-bubble .travel-day-heading {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.imperial-tourmate .assistant-bubble .travel-day h3 {
+  margin:0;
+  color:#823324;
+  font:700 14px/1.35 "Songti SC",STSong,Georgia,serif;
+  letter-spacing:.025em;
+}
+.imperial-tourmate .assistant-bubble .travel-day-symbol {
+  display:grid;
+  place-items:center;
+  flex:0 0 27px;
+  height:27px;
+  color:#fff3d6;
+  background:linear-gradient(130deg,#a64230,#77221e);
+  border:1px solid #d8a569;
+  border-radius:6px 2px 6px 2px;
+  font-size:14px;
+}
+.imperial-tourmate .assistant-bubble .travel-day-summary {
+  margin:4px 0 0 37px;
+  color:#604531;
+  font-size:13px;
+  line-height:1.65;
+  white-space:pre-line;
+}
+.imperial-tourmate .assistant-bubble .travel-list {
+  margin:0;
+  padding:0 0 0 25px;
+  display:grid;
+  gap:8px;
+  color:#503c31;
+  font-size:13.4px;
+  line-height:1.7;
+}
+.imperial-tourmate .assistant-bubble .travel-list li {padding-left:3px}
+.imperial-tourmate .assistant-bubble .travel-list li::marker {
+  color:#9c5837;
+  font-weight:800;
+}
+.imperial-tourmate .assistant-bubble .travel-day + .travel-list,
+.imperial-tourmate .assistant-bubble .travel-day + .travel-prose {
+  margin-top:-5px;
+  margin-left:9px;
+  padding-left:18px;
+  border-left:2px solid #e8d1ae;
+}
+.imperial-tourmate .message-meta {gap:11px;flex-wrap:wrap}
+.imperial-tourmate .copy-button {
+  border-radius:8px;
+  padding:5px 8px;
+}
+.imperial-tourmate .copy-button:hover {
+  background:#f2e2ca;
+}
+.imperial-tourmate .trust-passport {
+  margin-top:9px;
+  border-radius:10px;
+}
+.imperial-tourmate .trust-passport summary {min-height:36px}
+.imperial-tourmate .sources-card {
+  padding:12px 14px;
+  border-radius:10px;
+}
+.imperial-tourmate .sources-card a {max-width:100%;overflow-wrap:anywhere}
+
+/* Quick tools are collapsed by default; saved PDF remains visible. */
+.imperial-tourmate .chat-utility-toolbar {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  max-width:1080px;
+  margin:0 auto 8px;
+}
+.imperial-tourmate .chat-utility-toolbar button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:35px;
+  border:1px solid #d7b78b;
+  border-radius:9px;
+  padding:8px 12px;
+  color:#673b26;
+  background:#fff9ef;
+  font:700 11px/1.2 -apple-system,BlinkMacSystemFont,sans-serif;
+  transition:transform .18s,border-color .18s,background .18s;
+}
+.imperial-tourmate .chat-utility-toolbar button:hover:not(:disabled) {
+  background:#f4e5d0;
+  border-color:#b48451;
+  transform:translateY(-1px);
+}
+.imperial-tourmate .chat-tools-toggle svg {color:#a85d32}
+.imperial-tourmate .chat-tools-toggle[aria-expanded="true"] {
+  color:#852f25;
+  background:#f4e0c3;
+  border-color:#bf8d53;
+}
+.imperial-tourmate .chat-tools-toggle span {font-size:17px;line-height:.6}
+.imperial-tourmate .chat-utility-toolbar .chat-save-pdf {
+  margin-left:auto;
+  background:linear-gradient(120deg,#88271f,#aa4531);
+  color:#fff2dc;
+  border-color:#d2a16a;
+  box-shadow:0 3px 11px #7b2b1d25;
+}
+.imperial-tourmate .chat-utility-toolbar .chat-save-pdf:hover:not(:disabled) {
+  background:#77221b;
+  color:#fff9ec;
+}
+.imperial-tourmate .chat-utility-toolbar .chat-save-text {
+  font-weight:750;
+  padding-inline:10px;
+  color:#856549;
+}
+.imperial-tourmate .composer-area > .tool-strip-compact {
+  max-width:1080px;
+  margin:0 auto;
+  padding:3px 0 8px;
+  scrollbar-width:thin;
+}
+.imperial-tourmate .composer-area > .refinement-strip {
+  border-top:1px solid #e6cfae;
+  padding-top:9px;
+  padding-bottom:8px;
+}
+.imperial-tourmate .refinement-strip button {
+  white-space:nowrap;
+  padding-block:7px;
+}
+.imperial-tourmate .composer {
+  transition:border-color .18s,box-shadow .18s;
+}
+
+/* People who revisit an earlier section stay there until they choose to jump. */
+.imperial-tourmate .conversation .jump-to-latest {
+  position:sticky;
+  z-index:11;
+  bottom:14px;
+  left:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  width:max-content;
+  min-height:39px;
+  margin:0 24px 14px auto;
+  padding:8px 14px;
+  border:1px solid #dab17d;
+  border-radius:99px;
+  background:#77221de8;
+  color:#fff3da;
+  box-shadow:0 9px 26px #54231a42;
+  backdrop-filter:blur(10px);
+  font-size:12px;
+  font-weight:750;
+}
+.imperial-tourmate .conversation .jump-to-latest:hover {
+  background:#9a392d;
+  transform:translateY(-2px);
+}
+.imperial-tourmate .conversation .jump-to-latest span {
+  color:#f8cf92;
+  font-size:19px;
+  line-height:1;
+}
+
+/* A more restrained header, better text sizing and practical small screens. */
+.imperial-tourmate .imperial-topnav button {
+  text-wrap:nowrap;
+  text-overflow:ellipsis;
+}
+.imperial-tourmate .imperial-chat-heading h2 {
+  overflow-wrap:anywhere;
+  max-width:72ch;
+}
+.imperial-tourmate .suggestion-card {
+  outline-offset:4px;
+  box-shadow:0 6px 23px #79341b20;
+}
+.imperial-tourmate .suggestion-card .suggestion-number {
+  align-self:start;
+}
+.imperial-tourmate .suggestion-card strong {text-wrap:balance}
+@media (max-width:900px) {
+  .imperial-tourmate .assistant-row .message-column {max-width:95%}
+  .imperial-tourmate .user-row .message-column {max-width:89%}
+  .imperial-tourmate .message-list {padding-inline:18px}
+}
+@media (max-width:720px) {
+  .imperial-tourmate .message-list {padding:16px 11px 26px}
+  .imperial-tourmate .assistant-row .message-column {max-width:calc(100% - 46px)}
+  .imperial-tourmate .user-row .message-column {max-width:90%}
+  .imperial-tourmate .assistant-bubble {padding:15px 14px;font-size:13px}
+  .imperial-tourmate .user-bubble {padding:12px 14px;font-size:13px}
+  .imperial-tourmate .assistant-bubble .travel-answer {gap:11px}
+  .imperial-tourmate .assistant-bubble .travel-prose {font-size:12.5px;line-height:1.75}
+  .imperial-tourmate .assistant-bubble .travel-day {padding:11px}
+  .imperial-tourmate .assistant-bubble .travel-day h3 {font-size:12.5px}
+  .imperial-tourmate .assistant-bubble .travel-day-summary {margin-left:0;font-size:12px}
+  .imperial-tourmate .assistant-bubble .travel-list {font-size:12px;padding-left:20px}
+  .imperial-tourmate .chat-utility-toolbar {gap:6px;margin-bottom:7px}
+  .imperial-tourmate .chat-utility-toolbar button {min-height:33px;padding:7px 9px;font-size:10px}
+  .imperial-tourmate .chat-save-text {display:none}
+  .imperial-tourmate .composer-area > .refinement-strip {padding-top:7px}
+  .imperial-tourmate .composer-area {padding-bottom:max(9px,env(safe-area-inset-bottom,9px))}
+  .imperial-tourmate .conversation .jump-to-latest {margin-right:13px;bottom:10px;font-size:11px}
+  .imperial-tourmate .copy-button {font-size:10px}
+}
+@media (max-width:390px) {
+  .imperial-tourmate .chat-utility-toolbar .chat-save-pdf {padding-inline:8px}
+  .imperial-tourmate .chat-tools-toggle span {font-size:14px}
+  .imperial-tourmate .assistant-bubble .travel-subheading {font-size:14px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .imperial-tourmate .jump-to-latest,
+  .imperial-tourmate .chat-utility-toolbar button,
+  .imperial-tourmate .assistant-bubble {
+    transition:none!important;
+    animation:none!important;
+  }
+}
