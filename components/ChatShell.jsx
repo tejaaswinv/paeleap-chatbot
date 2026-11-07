@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthPanel from "./AuthPanel.jsx";
+import TravelMessage from "./TravelMessage.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
 import China3DScene from "./China3DScene.jsx";
 import ChinaWorldExplorer from "./ChinaWorldExplorer.jsx";
@@ -214,7 +215,7 @@ function Message({ message, language, copied, onCopy, avatar }) {
       {assistant && <div className="assistant-avatar" aria-hidden="true">{avatar}</div>}
       <div className="message-column">
         <div className={`message-bubble ${assistant ? "assistant-bubble" : "user-bubble"}`}>
-          <p>{message.content}</p>
+          {assistant ? <TravelMessage content={message.content}/> : <p>{message.content}</p>}
         </div>
           <div className="message-meta">
             {message.createdAt && <time className="message-time" dateTime={message.createdAt}
@@ -278,6 +279,10 @@ export default function ChatShell() {
   const [navExplorerOpen, setNavExplorerOpen] = useState(false);
   const navExplorerRef = useRef(null);
   const endRef = useRef(null);
+  const conversationRef = useRef(null);
+  const pinnedToBottomRef = useRef(true);
+  const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const [toolsExpanded, setToolsExpanded] = useState(false);
   const textareaRef = useRef(null);
   const requestsRef = useRef(new Map());
   const sidebarRef = useRef(null);
@@ -418,9 +423,24 @@ export default function ChatShell() {
     setCopied(null);
   }, [activeTrip?.id]);
 
+  // Preserve the reader's position when looking at earlier itinerary days.
+  // Scroll automatically only while the conversation is already at the bottom.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, pending, activeTrip?.id]);
+    pinnedToBottomRef.current = true;
+    setShowJumpToLatest(false);
+    setToolsExpanded(false);
+    const container = conversationRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  }, [activeTrip?.id]);
+
+  useEffect(() => {
+    if (!pinnedToBottomRef.current) return undefined;
+    const frame = requestAnimationFrame(() => {
+      const container = conversationRef.current;
+      if (container && pinnedToBottomRef.current) container.scrollTop = container.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [messages.length, pending, activeTrip?.id]);
 
   function setDraft(value) { if (activeTrip) history.updateTrip(activeTrip.id, { draft: value }); }
   function setError(value) { if (activeTrip) history.updateTrip(activeTrip.id, { error: value }); }
@@ -528,6 +548,22 @@ export default function ChatShell() {
       window.requestAnimationFrame(() => navExplorerRef.current?.focus());
   }
 
+  function onConversationScroll(event) {
+    const container = event.currentTarget;
+    const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 130;
+    pinnedToBottomRef.current = nearBottom;
+    setShowJumpToLatest(!nearBottom && messages.length > 0);
+  }
+
+  function jumpToLatest() {
+    pinnedToBottomRef.current = true;
+    setShowJumpToLatest(false);
+    const container = conversationRef.current;
+    if (!container) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    container.scrollTo({top:container.scrollHeight,behavior:reduced?"auto":"smooth"});
+  }
+
   function chooseSuggestion(prompt) {
     setDraft(prompt);
     setError("");
@@ -548,6 +584,8 @@ export default function ChatShell() {
     const conversationId = activeTrip.conversationId;
     const previousMessages = activeTrip.messages;
 
+    pinnedToBottomRef.current = true;
+    setShowJumpToLatest(false);
     resetComposerHeight();
     const createdAt = new Date().toISOString();
     history.updateTrip(tripId, (trip) => ({ ...trip, draft: "", error: "", pending: true,
@@ -762,7 +800,9 @@ export default function ChatShell() {
           <AuthPanel language={language} client={authClient} />
         ) : (
           <div className="chat-layout">
-            <section className={`conversation ${messages.length ? "has-messages" : ""}`} aria-label={activeTrip?.title || t.today}>
+            <section ref={conversationRef} onScroll={onConversationScroll}
+              className={`conversation ${messages.length ? "has-messages" : ""}`}
+              aria-label={activeTrip?.title || t.today}>
               {historyUnavailable ? (
                 <div className="history-loading" role="status">
                   {!activeTrip.historyError && <span className="loader" />}
@@ -833,16 +873,48 @@ export default function ChatShell() {
                   <div ref={endRef} />
                 </div>
               )}
+              {showJumpToLatest && messages.length > 0 && (
+                <button type="button" className="jump-to-latest" onClick={jumpToLatest}
+                  aria-label={language === "zh" ? "跳到最新消息" : "Jump to latest message"}>
+                  <span aria-hidden="true">↓</span>{language === "zh" ? "最新消息" : "Latest message"}
+                </button>
+              )}
             </section>
 
             <div className="composer-area">
               {persona?.id === DEFAULT_PERSONA_ID && messages.length > 0 && (
-                <nav className="tool-strip tool-strip-compact" aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
-                  {t.quickTools.map(tool => (
-                    <button type="button" key={tool.key} disabled={!personaReady || pending || historyUnavailable}
-                      onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
-                  ))}
-                </nav>
+                <>
+                  <div className="chat-utility-toolbar">
+                    <button type="button" className="chat-tools-toggle" aria-expanded={toolsExpanded}
+                      aria-controls="tourmate-quick-tools" onClick={() => setToolsExpanded(open => !open)}>
+                      <Icon name="spark" size={15}/>
+                      {language === "zh" ? "旅行工具" : "Travel tools"}
+                      <span aria-hidden="true">{toolsExpanded ? "⌃" : "⌄"}</span>
+                    </button>
+                    {pdfExportReady && (
+                      <button type="button" className="chat-save-pdf" onClick={downloadItineraryPdf}
+                        disabled={pending} aria-label={language === "zh" ? "下载完整行程 PDF" : "Download itinerary PDF"}>
+                        <Icon name="download" size={15}/>
+                        {language === "zh" ? "保存 PDF 行程" : "Save trip PDF"}
+                      </button>
+                    )}
+                    {exportablePlan && (
+                      <button type="button" className="chat-save-text" onClick={downloadTravelPlan}
+                        disabled={pending} aria-label={language === "zh" ? "下载纯文本行程" : "Download plain text trip plan"}>
+                        TXT
+                      </button>
+                    )}
+                  </div>
+                  {toolsExpanded && (
+                    <nav id="tourmate-quick-tools" className="tool-strip tool-strip-compact"
+                      aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
+                      {t.quickTools.map(tool => (
+                        <button type="button" key={tool.key} disabled={!personaReady || pending || historyUnavailable}
+                          onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
+                      ))}
+                    </nav>
+                  )}
+                </>
               )}
               {persona?.id === DEFAULT_PERSONA_ID && !historyUnavailable && refinementActions.length > 0 && (
                 <nav className="tool-strip tool-strip-compact refinement-strip"
@@ -853,19 +925,7 @@ export default function ChatShell() {
                       disabled={!personaReady || pending || historyUnavailable}
                       onClick={() => chooseSuggestion(action.prompt)}>{action.label}</button>
                   ))}
-                  {pdfExportReady && (
-                    <button type="button" className="export-trip-button" onClick={downloadItineraryPdf}
-                      disabled={pending} aria-label={language === "zh" ? "下载完整行程 PDF" : "Download full itinerary PDF"}
-                      title={language === "zh" ? "A4 排版模板 · 完整行程和后续调整" : "Designed A4 template · full itinerary and follow-up changes"}>
-                      <Icon name="download" size={15} />{language === "zh" ? "下载行程 PDF" : "Download itinerary PDF"}
-                    </button>
-                  )}
-                  {exportablePlan && (
-                    <button type="button" className="export-text-button" onClick={downloadTravelPlan}
-                      disabled={pending} aria-label={language === "zh" ? "下载纯文本行程" : "Download plain text trip plan"}>
-                      {language === "zh" ? "纯文本" : "TXT"}
-                    </button>
-                  )}
+
                 </nav>
               )}
               {history.storageFailed && <p className="history-notice" role="status">{t.storageError}</p>}
