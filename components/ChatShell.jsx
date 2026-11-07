@@ -893,7 +893,7 @@ export default function ChatShell() {
                     </button>
                     {pdfExportReady && (
                       <button type="button" className="chat-save-pdf" onClick={downloadItineraryPdf}
-                        disabled={pending} aria-label={language === "zh" ? "下载完整行程 PDF" : "Download full itinerary PDF"}>
+                        disabled={pending} aria-label={language === "zh" ? "下载完整行程 PDF" : "Download itinerary PDF"}>
                         <Icon name="download" size={15}/>
                         {language === "zh" ? "保存 PDF 行程" : "Save trip PDF"}
                       </button>
