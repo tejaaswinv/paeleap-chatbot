@@ -6,7 +6,7 @@ import "./tourmate-polish.css";
 
 export const metadata = {
   title: "Paeleap TourMate",
-  description: "Explore China with TourMate: your bilingual AI travel companion for unforgettable journeys.",
+  description: "Plan memorable journeys across China with TourMate, your bilingual AI travel companion.",
   applicationName: "Paeleap TourMate"
 };
 
