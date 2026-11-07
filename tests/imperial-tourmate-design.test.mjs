@@ -8,7 +8,7 @@ test("complete imperial theme is loaded after the old themes without adding font
   const layout=await read("app/layout.jsx");
   const css=await read("app/imperial-tourmate.css");
   assert.ok(layout.includes('import "./imperial-tourmate.css";'));
-  assert.ok(layout.indexOf('import "./imperial-tourmate.css";')>layout.indexOf('import "./china-cinematic.css";'));
+  assert.ok(layout.indexOf('import "./imperial-tourmate.css";')>layout.indexOf('import "./china-3d.css";'));
   assert.ok(layout.includes('themeColor: "#67120f"'));
   for(const [name,value] of Object.entries({"--pine-900":"#621616","--paper":"#fbf3e8","--gold":"#bf8d48"})){
     assert.ok(css.includes(name+":"+value),name);
@@ -21,14 +21,9 @@ test("all visible main navigation controls actually do something",async()=>{
   assert.match(ui,/className="imperial-side-menu"/);
   assert.match(ui,/className="imperial-topnav"/);
   assert.match(ui,/onClick=\{startNewTrip\}/);
-  assert.match(ui,/navExplorerRef\.current = event\.currentTarget; setNavExplorerOpen\(true\)/);
-  assert.match(ui,/navExplorerRef\.current\?\.focus\(\)/);
   assert.match(ui,/onClick=\{\(\) => chooseSuggestion\(language === "zh"/);
   assert.match(ui,/document\.getElementById\("trips-sidebar-history"\)/);
   assert.match(ui,/onClick=\{\(\) => textareaRef\.current\?\.focus\(\)\}/);
-  assert.match(ui,/navExplorerOpen && persona\?\.id === DEFAULT_PERSONA_ID/);
-  assert.match(ui,/<ChinaWorldExplorer language=\{language\} onClose=\{closeNavExplorer\}/);
-  assert.match(ui,/onSelectPrompt=\{chooseSuggestion\}/);
   assert.match(ui,/!needsAuthentication/);
 });
 
@@ -50,14 +45,14 @@ test("hero has ornamental vector foliage, lantern and red/gold typography while 
   const css=await read("app/imperial-tourmate.css");
   assert.match(ui,/<ChinaHeroOrnament \/>/);
   assert.match(ui,/className="china-hero-stage imperial-hero"/);
-  assert.match(ui,/<China3DScene language=\{language\} onExplorePrompt=\{chooseSuggestion\}><ChinaLandscape \/><\/China3DScene>/);
+  assert.match(ui,/<China3DScene language=\{language\}><ChinaLandscape \/><\/China3DScene>/);
   assert.match(ui,/<span className="hero-cn-title">山海之间<\/span>/);
   assert.match(ui,/Find your China\./);
   assert.match(ornament,/const leaves = \[/);
   assert.match(ornament,/imperial-lantern-glow/);
   assert.match(ornament,/stroke="#c49a5e"/);
   assert.match(css,/\.imperial-tourmate \.china-hero-stage/);
-  assert.match(css,/\.imperial-tourmate \.china-3d-enter-control/);
+  assert.match(css,/\.imperial-tourmate \.china-3d-view-control/);
 });
 
 test("full app uses red sidebar and header, parchment chat and gold composer—not just welcome styling",async()=>{
