@@ -3,6 +3,7 @@ import "./china-theme.css";
 import "./china-3d.css";
 import "./china-cinematic.css";
 import "./imperial-tourmate.css";
+import "./tourmate-polish.css";
 
 export const metadata = {
   title: "Paeleap TourMate",
