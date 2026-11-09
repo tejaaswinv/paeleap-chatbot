@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createSingleFlightCache } from "../lib/infra/single-flight-cache.js";
 import { createChatTrace } from "../lib/infra/chat-telemetry.js";
+import { remainingProviderBudget, providerAttemptSignal } from "../lib/infra/provider-deadline.js";
 import { getFaqBank } from "../lib/db/faq.js";
 import { CHINA_TOURISM_FAQS } from "../data/china-tourism-faq.js";
 import { POST } from "../app/api/chat/route.js";
@@ -124,4 +125,13 @@ test("chat API returns trace header on both valid and invalid requests, without 
   assert.equal(missingAuth.status,401);
   assert.match(missingAuth.headers.get("X-Request-ID"),/^[a-f0-9-]{36}$/i);
   assert.notEqual(missingAuth.headers.get("X-Request-ID"),invalid.headers.get("X-Request-ID"));
+});
+
+test("AI retries respect a cumulative 35-second budget across 25-second attempts", () => {
+  assert.equal(remainingProviderBudget(1000, () => 1000),25000);
+  assert.equal(remainingProviderBudget(1000, () => 21000),15000);
+  assert.equal(remainingProviderBudget(1000, () => 35000),1000);
+  assert.throws(()=>remainingProviderBudget(1000, () => 36000),error=>error.name==="TimeoutError");
+  assert.throws(()=>remainingProviderBudget(Number.NaN),/Invalid provider deadline/);
+  assert.ok(providerAttemptSignal(Date.now()) instanceof AbortSignal);
 });
