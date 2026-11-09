@@ -12,7 +12,7 @@
 1. Inspect the response headers for a failed or degraded `POST /api/chat` request in the browser Network panel.
 2. Copy **`X-Request-ID`** (server-generated UUID). **`Server-Timing`** reports the time elapsed inside the chat handler in milliseconds. Both are returned even for early 400/401/413/429 responses.
 3. Look for a `chat upstream degraded` log and match its `requestId`. The only logged attributes are request ID, allowlisted stage, fixed diagnostic error code, and duration.
-4. For unrecovered exceptions, look for `chat request failed` with the same ID and an allowlisted category (`internal`, `configuration`, `timeout`, `provider`).
+4. For unrecovered exceptions, look for `chat API error` with the same ID and an allowlisted category (`internal`, `configuration`, `timeout`, `provider`).
 5. The user-facing `ai.errorCode` remains a fixed, non-sensitive category. For example, `UPSTREAM_RESPONSE_INCOMPLETE` can mean the provider delivered a truncated response, **not** that the API key was unused.
 6. Inspect `/api/status` to determine which configured mode is active. It reports configuration flags, **not an actual inference or database connectivity probe**.
 
