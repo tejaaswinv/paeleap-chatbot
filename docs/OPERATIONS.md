@@ -4,7 +4,7 @@
 
 - **Frontend/API:** Next.js 16 App Router and React 19. `/api/chat` validates a bounded request, authenticates the Supabase session, enforces per-user quota, binds conversation/persona, then selects either reviewed evidence or the configured generative China-travel model.
 - **Knowledge:** The 100 published China travel FAQ records are fetched from Supabase in production. The local SQLite seed is development-only.
-- **AI gateway:** `AI_API_STYLE` selects an explicit Responses, Chat Completions or Anthropic protocol; it never guesses endpoints or changes providers. The gateway body has a strict allocation limit and upstream requests have individual 25-second timeouts.
+- **AI gateway:** `AI_API_STYLE` selects an explicit Responses, Chat Completions or Anthropic protocol; it never guesses endpoints or changes providers. The gateway body has a strict allocation limit and upstream requests have individual 25-second timeouts. Repeated Responses/FAQ compatibility requests now share a 35-second overall deadline, limiting runaway retries on Vercel.
 - **Source safety:** Personal sessions, user message text, bearer tokens, FAQ access credentials and upstream response bodies must never appear in production telemetry.
 
 ## Fast diagnosis from browser to logs
