@@ -6,6 +6,7 @@ import { authenticate, ensureConversation, getRecentMessages, storeExchange, con
 import { localDemoEnabled, mockAiEnabled } from "../../../lib/config.js";
 import { generateGroundedReply, renderEvidenceReply } from "../../../lib/ai/generate.js";
 import { aiFailureCode } from "../../../lib/ai/diagnostics.js";
+import { createChatTrace } from "../../../lib/infra/chat-telemetry.js";
 import { buildTrustPassport } from "../../../lib/ai/trust-passport.js";
 import { socialReply } from "../../../lib/ai/conversation-intents.js";
 import { scamPreventionReply } from "../../../lib/ai/scam-shield.js";
@@ -25,8 +26,10 @@ const MAX_BODY_BYTES = MAX_BODY_CHARACTERS * 4;
 const demoCounts = new Map();
 const demoConversations = new Map();
 
-function json(body, status = 200) {
-  return Response.json(body, { status, headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } });
+function json(body, status = 200, extraHeaders = {}) {
+  return Response.json(body, { status, headers: {
+    "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", ...extraHeaders
+  } });
 }
 
 class PayloadError extends Error {
@@ -83,22 +86,24 @@ function localHistory(value) {
 }
 
 export async function POST(request) {
+  const trace = createChatTrace();
+  const respond = (body, status = 200) => json(body, status, trace.headers());
   try {
     const bodyText = await boundedBodyText(request);
     let body;
-    try { body = JSON.parse(bodyText); } catch { return json({ error: "Malformed JSON" }, 400); }
-    if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "Invalid payload" }, 400);
+    try { body = JSON.parse(bodyText); } catch { return respond({ error: "Malformed JSON" }, 400); }
+    if (!body || typeof body !== "object" || Array.isArray(body)) return respond({ error: "Invalid payload" }, 400);
 
     const language = body.language === "zh" ? "zh" : body.language === "en" || body.language == null ? "en" : null;
-    if (!language) return json({ error: "Language must be en or zh" }, 400);
+    if (!language) return respond({ error: "Language must be en or zh" }, 400);
     const personaId = body.personaId ?? DEFAULT_PERSONA_ID;
     if (typeof personaId !== "string" || !/^[a-z][a-z0-9-]{1,63}$/.test(personaId)) {
-      return json({ error: "Invalid personaId" }, 400);
+      return respond({ error: "Invalid personaId" }, 400);
     }
     let classified = classifyInput(body.message, language);
-    if (classified.status === "invalid") return json({ error: "Message must be 1–1500 characters" }, 400);
+    if (classified.status === "invalid") return respond({ error: "Message must be 1–1500 characters" }, 400);
     if (body.conversationId != null && (typeof body.conversationId !== "string" || !UUID.test(body.conversationId))) {
-      return json({ error: "conversationId must be a UUID or omitted" }, 400);
+      return respond({ error: "conversationId must be a UUID or omitted" }, 400);
     }
 
     const demo = localDemoEnabled();
@@ -107,9 +112,9 @@ export async function POST(request) {
     let history = [];
     let persona;
     if (demo) {
-      if (!takeDemoSlot()) return json({ error: "Rate limit exceeded" }, 429);
+      if (!takeDemoSlot()) return respond({ error: "Rate limit exceeded" }, 429);
       persona = await resolvePersona(personaId);
-      if (!persona) return json({ error: "Persona not found" }, 404);
+      if (!persona) return respond({ error: "Persona not found" }, 404);
       conversationId ||= crypto.randomUUID();
       const now = Date.now();
       for (const [id, record] of demoConversations) {
@@ -117,25 +122,25 @@ export async function POST(request) {
       }
       const record = demoConversations.get(conversationId);
       if (record && (record.personaId !== persona.id || record.personaVersion !== persona.version)) {
-        return json({ error: "Persona changed. Start a new conversation." }, 409);
+        return respond({ error: "Persona changed. Start a new conversation." }, 409);
       }
       // Do not import an arbitrary visitor's history into a custom museum.
       history = record?.messages || (personaId === DEFAULT_PERSONA_ID ? localHistory(body.history) : []);
     } else {
       const bearer = request.headers.get("authorization")?.match(/^Bearer[ \t]+([^\s]+)$/i)?.[1];
-      if (!bearer) return json({ error: "Authentication required" }, 401);
-      if (bearer.length > 8192) return json({ error: "Invalid session" }, 401);
+      if (!bearer) return respond({ error: "Authentication required" }, 401);
+      if (bearer.length > 8192) return respond({ error: "Invalid session" }, 401);
       user = await authenticate(bearer);
-      if (!user) return json({ error: "Invalid session" }, 401);
-      if (!await consumeQuota(user.id)) return json({ error: "Rate limit exceeded" }, 429);
+      if (!user) return respond({ error: "Invalid session" }, 401);
+      if (!await consumeQuota(user.id)) return respond({ error: "Rate limit exceeded" }, 429);
       persona = await resolvePersona(personaId);
-      if (!persona) return json({ error: "Persona not found" }, 404);
+      if (!persona) return respond({ error: "Persona not found" }, 404);
       const binding = { id: persona.id, version: persona.version };
       const ownedId = conversationId ? await ensureConversation(user, conversationId, "") : null;
-      if (conversationId && !ownedId) return json({ error: "Conversation not found" }, 404);
+      if (conversationId && !ownedId) return respond({ error: "Conversation not found" }, 404);
       conversationId = await ensureConversation(user, conversationId, body.message.trim(), binding);
-      if (ownedId && !conversationId) return json({ error: "Persona changed. Start a new conversation." }, 409);
-      if (!conversationId) return json({ error: "Conversation not found" }, 404);
+      if (ownedId && !conversationId) return respond({ error: "Persona changed. Start a new conversation." }, 409);
+      if (!conversationId) return respond({ error: "Conversation not found" }, 404);
       history = await getRecentMessages(user, conversationId);
     }
 
@@ -231,9 +236,7 @@ export async function POST(request) {
           // Never turn raw upstream errors into user-visible text.
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
-          console.warn("AI generation degraded; using curated FAQ fallback", {
-            stage: generativeTourMate ? "tourism_generation" : "evidence_selection", code: providerErrorCode
-          });
+          trace.degraded(generativeTourMate ? "tourism_generation" : "evidence_selection", providerErrorCode);
         }
       }
       if (!generationUsed) {
@@ -246,9 +249,7 @@ export async function POST(request) {
         } catch (error) {
           providerDegraded = true;
           providerErrorCode = aiFailureCode(error);
-          console.warn("AI matching degraded; using curated FAQ fallback", {
-            stage: "faq_selection", code: providerErrorCode
-          });
+          trace.degraded("faq_selection", providerErrorCode);
           selection = matchFaqOffline(body.message.trim(), faqs, sanitizeFaqHistory(history), { allowReviewedTopics: persona.id !== DEFAULT_PERSONA_ID });
         }
         faq = selection ? faqs.find((item) => item.id === selection.faqId) : null;
@@ -285,14 +286,14 @@ export async function POST(request) {
     const trust = buildTrustPassport({
       status, mode: answerMode, sources, personaVersion: persona.version, providerDegraded
     });
-    return json({ reply: verified.reply, conversationId, sources,
+    return respond({ reply: verified.reply, conversationId, sources,
       safety: { status, ...(status === "redirected" && responseReason ? { reason: responseReason } : {}) },
       persona: publicPersona(persona), trust,
       ai: { mode: answerMode,
         ...(providerDegraded ? { errorCode: providerErrorCode || "UPSTREAM_UNKNOWN" } : {}) },
       ...(status === "allowed" && faq ? { faq: { id: faq.id, question: faq[language === "zh" ? "question_zh" : "question_en"], category: faq.category } } : {}) });
   } catch (error) {
-    if (error instanceof PayloadError) return json({ error: error.message }, error.status);
+    if (error instanceof PayloadError) return respond({ error: error.message }, error.status);
     // Never return raw upstream response bodies, database errors, or credentials to clients.
     const message = error instanceof Error ? error.message : "";
     const kind = /not configured/.test(message) ? "configuration"
@@ -300,10 +301,10 @@ export async function POST(request) {
       : /AI provider returned|Empty or invalid AI/.test(message) ? "provider" : "internal";
     // Error messages may embed URLs, SQL, user text or bearer tokens. Log only
     // a fixed, allowlisted category; never the exception, stack or raw message.
-    console.error("chat API error", { kind });
-    if (kind === "configuration") return json({ error: "Backend not configured" }, 503);
-    if (kind === "timeout") return json({ error: "Request timed out" }, 504);
-    if (kind === "provider") return json({ error: "AI service unavailable" }, 502);
-    return json({ error: "Chat request could not be completed" }, 503);
+    trace.failed(kind);
+    if (kind === "configuration") return respond({ error: "Backend not configured" }, 503);
+    if (kind === "timeout") return respond({ error: "Request timed out" }, 504);
+    if (kind === "provider") return respond({ error: "AI service unavailable" }, 502);
+    return respond({ error: "Chat request could not be completed" }, 503);
   }
 }

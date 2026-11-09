@@ -235,7 +235,12 @@ test("BOUNDARY17 backend exception messages and secrets are absent from response
   const response = await POST(request());
   assert.equal(response.status, 503);
   assert.doesNotMatch(await response.text(), new RegExp(`${CANARY}|${SERVICE}|${TOKEN_A}`));
-  assert.deepEqual(logs, [["chat API error", { kind: "internal" }]]);
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0][0], "chat API error");
+  assert.equal(logs[0][1].kind, "internal");
+  assert.match(logs[0][1].requestId, /^[a-f0-9-]{36}$/i);
+  assert.ok(Number.isInteger(logs[0][1].durationMs));
+  assert.doesNotMatch(JSON.stringify(logs), new RegExp(`${CANARY}|${SERVICE}|${TOKEN_A}`));
 });
 
 test("BOUNDARY18 database write failures do not echo SQL or user canaries", async (t) => {
