@@ -1,0 +1,259 @@
+/* TourMate · Smart Trip Planner, integrated into the lacquer-red journey system. */
+.imperial-tourmate .smart-planner-launch {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:41px;
+  padding:9px 16px;
+  color:#fff0d2;
+  background:linear-gradient(130deg,#922c24,#69201b);
+  border:1px solid #d5a05d;
+  border-radius:10px;
+  box-shadow:0 6px 18px #75331e33,inset 0 1px #f3d2a05a;
+  font-size:12px;
+  font-weight:750;
+  letter-spacing:.025em;
+}
+.imperial-tourmate .smart-planner-launch:hover:not(:disabled){
+  background:linear-gradient(130deg,#aa4533,#812820);
+  border-color:#e3bb80;transform:translateY(-2px);
+}
+.imperial-tourmate .smart-planner-launch:focus-visible {
+  outline:3px solid #e1b071;outline-offset:3px;
+}
+.imperial-tourmate .smart-planner-welcome {
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin-top:17px;
+  padding:15px 18px;
+  border:1px solid #d8b17d;
+  border-radius:12px;
+  text-align:left;
+  background:linear-gradient(105deg,#fff8e9,#f4e4c8);
+  box-shadow:0 5px 18px #804b261c;
+}
+.imperial-tourmate .smart-planner-welcome-copy {
+  display:flex;gap:11px;align-items:center;min-width:0;
+}
+.imperial-tourmate .smart-planner-welcome-mark {
+  display:grid;place-items:center;
+  width:42px;height:42px;flex:0 0 auto;
+  color:#ffedc9;
+  background:#96382b;
+  border:1px solid #d3a16a;
+  border-radius:8px 2px 8px 2px;
+  font:25px "Songti SC",STSong,Georgia,serif;
+}
+.imperial-tourmate .smart-planner-welcome-copy strong {
+  display:block;
+  font:650 17px "Songti SC",STSong,Georgia,serif;
+  color:#67251f;
+}
+.imperial-tourmate .smart-planner-welcome-copy small {
+  display:block;margin-top:4px;
+  color:#96745d;
+  font-size:11px;line-height:1.4;
+}
+.imperial-tourmate .smart-planner-mobile-trigger {
+  display:none;
+}
+.smart-planner-backdrop {
+  position:fixed;inset:0;z-index:9998;
+  display:grid;place-items:center;
+  background:rgba(36,14,14,.73);
+  backdrop-filter:blur(9px);
+  padding:clamp(10px,3vw,34px);
+  animation:smart-planner-appear .2s ease-out both;
+}
+.smart-planner {
+  width:min(760px,100%);
+  max-height:min(92dvh,920px);
+  display:flex;flex-direction:column;min-height:0;
+  overflow:hidden;overscroll-behavior:contain;
+  color:#3e2720;
+  background:
+    radial-gradient(circle at 94% 5%,#f7d9af76,transparent 34%),
+    linear-gradient(145deg,#fff8ed,#f8ead5);
+  border:2px solid #d6a667;
+  border-radius:15px;
+  box-shadow:0 35px 100px #190b0b9c,inset 0 0 0 5px #fff7e5;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC",sans-serif;
+}
+.smart-planner * {box-sizing:border-box}
+.smart-planner button,.smart-planner input,.smart-planner select,.smart-planner textarea{font:inherit}
+.smart-planner button{cursor:pointer}
+.smart-planner button:disabled{cursor:not-allowed;opacity:.48}
+.smart-planner :focus-visible{outline:3px solid #b97439;outline-offset:3px}
+.smart-planner-top {
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:22px clamp(20px,4vw,34px);
+  background:
+    radial-gradient(circle at 92% 15%,#d1885145,transparent 45%),
+    linear-gradient(125deg,#761813,#50100e);
+  border-bottom:2px solid #d6a46b;
+  color:#fdf0d7;
+}
+.smart-planner-title-group{display:flex;align-items:center;gap:15px;min-width:0}
+.smart-planner-seal{
+  display:grid;place-items:center;
+  flex:0 0 48px;width:48px;height:48px;
+  background:linear-gradient(130deg,#b0523d,#802318);
+  border:1px solid #e3b476;
+  border-radius:8px 2px 8px 2px;
+  box-shadow:inset 0 0 0 4px #edbd794d;
+  transform:rotate(-4deg);
+  font:27px "Songti SC",STSong,Georgia,serif;
+}
+.smart-planner-eyebrow{margin:0 0 4px;color:#eac393;font-size:9px;letter-spacing:.13em;font-weight:750}
+.smart-planner-top h2{
+  margin:0;color:#fff1d6;
+  font:600 clamp(22px,3.2vw,30px)/1.16 "Songti SC",STSong,Georgia,serif;
+}
+.smart-planner-close{
+  flex:0 0 35px;
+  display:grid;place-items:center;
+  width:35px;height:35px;
+  border:1px solid #e4ba855e;border-radius:50%;
+  background:#fff5d31a;color:#ffe4b7;
+  font:29px/1 Georgia,serif;
+}
+.smart-planner-close:hover{background:#e7bd7b30;border-color:#f7d395}
+.smart-planner-intro{
+  margin:0;
+  flex:0 0 auto;
+  padding:13px clamp(20px,4vw,34px) 8px;
+  color:#82664f;
+  font-size:12px;line-height:1.65;
+}
+.smart-planner-form{
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  min-height:0;
+  display:flex;flex-direction:column;gap:16px;
+  padding:9px clamp(20px,4vw,34px) 23px;
+  scrollbar-color:#d2a977 #f6e8d6;
+}
+.smart-planner-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+.smart-planner-grid.planner-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.smart-planner-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.smart-planner-field>span,.smart-planner-group legend{
+  color:#7a392b;
+  font-weight:750;
+  font-size:11px;
+  letter-spacing:.01em;
+}
+.smart-planner-field em{color:#a64835;font-style:normal}
+.smart-planner-field input,
+.smart-planner-field textarea,
+.smart-planner-field select{
+  width:100%;min-width:0;
+  padding:10px 12px;
+  border:1px solid #d8b38a;
+  border-radius:8px;
+  color:#4c2b26;
+  background:#fffdf5;
+  font-size:12px;
+  box-shadow:inset 0 1px 2px #7b42200e;
+}
+.smart-planner-field input:focus,
+.smart-planner-field textarea:focus,
+.smart-planner-field select:focus{
+  border-color:#aa6245;outline:2px solid #d7aa764d;outline-offset:1px;
+}
+.smart-planner-field input::placeholder,.smart-planner-field textarea::placeholder{color:#ae967e}
+.smart-planner-field input[type=number]{font-variant-numeric:tabular-nums}
+.smart-planner-field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.smart-planner-group{border:0;padding:0;margin:0;min-width:0}
+.smart-planner-group legend{margin-bottom:9px}
+.smart-planner-group legend small{margin-left:8px;font-size:9px;color:#a18567;font-weight:500}
+.smart-planner-chip-list{display:flex;flex-wrap:wrap;gap:7px}
+.smart-planner-chip-list button{
+  padding:8px 12px;min-height:35px;
+  border:1px solid #dabb91;
+  border-radius:99px;
+  color:#79513c;background:#fffbf3;
+  font-size:11px;font-weight:650;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+.smart-planner-chip-list button.selected{
+  border-color:#b17846;
+  color:#fff0d5;
+  background:linear-gradient(105deg,#a84834,#75241e);
+  box-shadow:0 3px 8px #8d47262c;
+}
+.smart-planner-chip-list button:hover:not(:disabled){transform:translateY(-2px);border-color:#ae7043}
+.smart-planner-date-note{margin:-10px 0 0;color:#957c64;font-size:10px}
+.smart-planner-error{
+  margin:-4px 0 0;
+  border:1px solid #bb6553;border-radius:8px;
+  background:#fce6e0;color:#902d25;
+  padding:9px 12px;font-size:12px;
+}
+.smart-planner-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-top:13px;
+  border-top:1px solid #dec39e;
+}
+.smart-planner-footer p{margin:0;max-width:380px;color:#937558;font-size:10px;line-height:1.55}
+.smart-planner-submit{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  flex-shrink:0;
+  min-height:44px;padding:11px 18px;
+  border:1px solid #d6a16a;border-radius:9px;
+  background:linear-gradient(125deg,#a83c2f,#751e19);
+  color:#ffeed2;box-shadow:0 5px 14px #81362243;
+  font-weight:750;font-size:12px;
+}
+.smart-planner-submit:hover{
+  transform:translateY(-2px);
+  background:linear-gradient(125deg,#be5338,#85241e);
+}
+@keyframes smart-planner-appear {
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:900px){
+  .imperial-tourmate .smart-planner-welcome{padding:12px}
+  .imperial-tourmate .smart-planner-welcome-copy strong{font-size:14px}
+  .imperial-tourmate .smart-planner-launch{font-size:11px;padding:9px 12px}
+}
+@media(max-width:720px){
+  .imperial-tourmate .smart-planner-welcome{align-items:flex-start;flex-direction:column;gap:11px}
+  .imperial-tourmate .smart-planner-launch{width:100%}
+  .imperial-tourmate .smart-planner-mobile-trigger{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    min-width:39px;min-height:39px;
+    padding:8px;
+    color:#ffdfb8;background:#76201a;
+    border:1px solid #d4a267;border-radius:9px;
+  }
+  .smart-planner-backdrop{padding:8px;align-items:center}
+  .smart-planner{max-height:96dvh;border-radius:12px}
+  .smart-planner-top{padding:15px}
+  .smart-planner-title-group{gap:10px}
+  .smart-planner-top h2{font-size:21px}
+  .smart-planner-seal{width:38px;height:38px;flex-basis:38px;font-size:24px}
+  .smart-planner-intro{padding:11px 15px 6px;font-size:11px}
+  .smart-planner-form{padding:8px 15px 17px;gap:14px}
+  .smart-planner-grid.planner-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .smart-planner-chip-list{gap:6px}
+  .smart-planner-chip-list button{font-size:10px;min-height:33px;padding:7px 10px}
+  .smart-planner-footer{flex-direction:column;align-items:stretch;gap:11px}
+  .smart-planner-footer p{max-width:none}
+  .smart-planner-submit{width:100%}
+}
+@media(max-width:375px){
+  .smart-planner-grid{grid-template-columns:1fr}
+  .smart-planner-grid.planner-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .smart-planner-top h2{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+  .smart-planner-backdrop,.smart-planner *{animation:none!important;transition:none!important}
+}
