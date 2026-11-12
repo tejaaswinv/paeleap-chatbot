@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthPanel from "./AuthPanel.jsx";
 import TravelMessage from "./TravelMessage.jsx";
+import SmartTripPlanner from "./SmartTripPlanner.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
 import China3DScene from "./China3DScene.jsx";
 import ChinaDestinationArt from "./ChinaDestinationArt.jsx";
@@ -275,6 +276,8 @@ export default function ChatShell() {
   const [session, setSession] = useState(null);
   const [copied, setCopied] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [plannerOpen, setPlannerOpen] = useState(false);
+  const plannerTriggerRef = useRef(null);
   const endRef = useRef(null);
   const conversationRef = useRef(null);
   const pinnedToBottomRef = useRef(true);
@@ -555,6 +558,23 @@ export default function ChatShell() {
     container.scrollTo({top:container.scrollHeight,behavior:reduced?"auto":"smooth"});
   }
 
+  function openTripPlanner(event) {
+    if (!personaReady || !activeTrip || historyUnavailable || pending) return;
+    plannerTriggerRef.current = event?.currentTarget || null;
+    setSidebarOpen(false);
+    setPlannerOpen(true);
+  }
+
+  function closeTripPlanner(restoreFocus = true) {
+    setPlannerOpen(false);
+    if (restoreFocus) requestAnimationFrame(() => plannerTriggerRef.current?.focus());
+  }
+
+  function composeSmartTrip(prompt) {
+    closeTripPlanner(false);
+    chooseSuggestion(prompt);
+  }
+
   function chooseSuggestion(prompt) {
     setDraft(prompt);
     setError("");
@@ -689,7 +709,7 @@ export default function ChatShell() {
         </button>
         {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
           <nav className="imperial-side-menu" aria-label={language === "zh" ? "旅行导航" : "Travel navigation"}>
-            <button type="button" onClick={startNewTrip} disabled={!history.ready}>
+            <button type="button" onClick={openTripPlanner} disabled={!personaReady || historyUnavailable || pending}>
               <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
             </button>
             <button type="button" onClick={() => chooseSuggestion(language === "zh"
@@ -740,7 +760,7 @@ export default function ChatShell() {
               <button type="button" className="imperial-nav-active"
                 onClick={() => textareaRef.current?.focus()}><Icon name="spark" size={17}/>{language === "zh" ? "AI 旅行对话" : "AI Travel Chat"}</button>
               <span aria-hidden="true" className="imperial-nav-divider"/>
-              <button type="button" onClick={startNewTrip} disabled={!history.ready}>
+              <button type="button" onClick={openTripPlanner} disabled={!personaReady || historyUnavailable || pending}>
                 <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a Trip"}</button>
               <span aria-hidden="true" className="imperial-nav-divider"/>
               <button type="button" onClick={() => chooseSuggestion(language === "zh"
@@ -830,6 +850,22 @@ export default function ChatShell() {
                     ))}
                   </div>
                   {persona?.id === DEFAULT_PERSONA_ID && (
+                    <section className="smart-planner-welcome" aria-label={language === "zh" ? "智能行程规划" : "Smart trip planning"}>
+                      <div className="smart-planner-welcome-copy">
+                        <span className="smart-planner-welcome-mark" aria-hidden="true">程</span>
+                        <div>
+                          <strong>{language === "zh" ? "专属旅程，从这里启程" : "Your next adventure, made personal."}</strong>
+                          <small>{language === "zh" ? "告诉我们你的预算、天数和喜好。" : "Choose your budget, pace, destination and must-sees."}</small>
+                        </div>
+                      </div>
+                      <button type="button" className="smart-planner-launch" onClick={openTripPlanner}>
+                        <Icon name="calendar" size={17}/>
+                        {language === "zh" ? "智能规划行程" : "Build my trip"}
+                        <span aria-hidden="true">↗</span>
+                      </button>
+                    </section>
+                  )}
+                  {persona?.id === DEFAULT_PERSONA_ID && (
                     <div className="tool-strip" aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
                       {t.quickTools.filter(tool => tool.key !== "trip_brief").map(tool => (
                         <button type="button" key={tool.key} onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
@@ -870,6 +906,11 @@ export default function ChatShell() {
               {persona?.id === DEFAULT_PERSONA_ID && messages.length > 0 && (
                 <>
                   <div className="chat-utility-toolbar">
+                    <button type="button" className="chat-plan-trip" onClick={openTripPlanner}
+                      disabled={!personaReady || historyUnavailable || pending}>
+                      <Icon name="calendar" size={15}/>
+                      {language === "zh" ? "智能规划" : "Plan a trip"}
+                    </button>
                     <button type="button" className="chat-tools-toggle" aria-expanded={toolsExpanded}
                       aria-controls="tourmate-quick-tools" onClick={() => setToolsExpanded(open => !open)}>
                       <Icon name="spark" size={15}/>
@@ -940,6 +981,9 @@ export default function ChatShell() {
           </div>
         )}
       </main>
+      {plannerOpen && persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
+        <SmartTripPlanner language={language} onClose={closeTripPlanner} onCompose={composeSmartTrip}/>
+      )}
     </div>
   );
 }
