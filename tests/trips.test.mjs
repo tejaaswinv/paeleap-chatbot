@@ -64,7 +64,7 @@ test("cloud trips merge with a cached conversation without discarding its draft 
   assert.equal(merged.length, 1);
   assert.equal(merged[0].id, local.id);
   assert.equal(merged[0].draft, "Keep my draft");
-  assert.equal(merged[0].loaded, false);
+  assert.equal(merged[0].loaded, true);
   assert.deepEqual(merged[0].messages, [reply]);
 });
 

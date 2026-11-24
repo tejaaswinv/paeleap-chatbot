@@ -278,7 +278,6 @@ export default function ChatShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
   const plannerTriggerRef = useRef(null);
-  const endRef = useRef(null);
   const conversationRef = useRef(null);
   const pinnedToBottomRef = useRef(true);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
@@ -891,7 +890,6 @@ export default function ChatShell() {
                       <div className="typing-bubble"><span /><span /><span /><em>{t.thinking}</em></div>
                     </div>
                   )}
-                  <div ref={endRef} />
                 </div>
               )}
               {showJumpToLatest && messages.length > 0 && (

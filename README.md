@@ -135,7 +135,7 @@ stored provenance receipt; the UI does not reconstruct one from unsupported data
 - `lib/db/faq.js` — SQLite seed/read validation and optional server-only Supabase FAQ reads.
 - `scripts/faq-bank.mjs` — initialize/check SQLite and export the Supabase seed.
 - `supabase/faq-schema.sql`, generated `supabase/faq-seed.sql` — optional remote FAQ setup.
-- `lib/tourism/retrieval.js`, `data/attractions.js` — legacy attraction reference utilities; no longer the chat reply path.
+- `lib/tourism/faq-matching.js` and `lib/ai/tourism-generation.js` — active retrieval and AI travel planning; obsolete attraction-only retrieval and itinerary helpers were retired.
 - `lib/db/supabase.js` — authenticated REST reads, server-side writes and quota.
 - `supabase/schema.sql` — SQL schema and RLS.
 - `tests/` — Node's built-in test runner.

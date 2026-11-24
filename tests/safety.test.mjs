@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { classifyInput, validateOutput } from "../lib/ai/safety.js";
-import { retrieveAttractions, sourceLinks } from "../lib/tourism/retrieval.js";
-import { isItineraryRequest } from "../lib/tourism/itinerary.js";
+import { CHINA_TOURISM_FAQS } from "../data/china-tourism-faq.js";
 import { chatEndpoint, buildMessages } from "../lib/ai/provider.js";
 
 test("normal sightseeing questions are allowed", () => {
@@ -35,24 +34,11 @@ test("removes apparent secrets from model output", () => {
 test("removes unsupported dynamic opening hours", () => {
   assert.equal(validateOutput("The temple closes at 17:00", "en").status, "sanitized");
 });
-test("retrieves bilingual verified attraction records", () => {
-  assert.equal(retrieveAttractions("西湖").at(0)?.id, "west-lake");
-  assert.equal(retrieveAttractions("Tell me about the Grand Canal").at(0)?.id, "grand-canal");
-});
-test("returns only prelisted source URLs", () => {
-  for (const s of sourceLinks(retrieveAttractions("Hangzhou"))) {
-    assert.match(s.url, /^https:\/\/whc\.unesco\.org\/en\/list\//);
-  }
-});
-test("detects itinerary intent in both languages", () => {
-  assert.equal(isItineraryRequest("Plan a one-day trip"), true);
-  assert.equal(isItineraryRequest("杭州一日游路线"), true);
-});
 test("builds bounded, system-first conversation context", () => {
   const messages = buildMessages({
     message: "Tell me about West Lake", language: "en",
     history: Array.from({ length: 30 }, () => ({ role: "user", content: "hello" })),
-    attractions: retrieveAttractions("West Lake")
+    faqs: CHINA_TOURISM_FAQS.filter(row => row.id === "CN061")
   });
   assert.equal(messages[0].role, "system");
   assert.equal(messages.at(-1).role, "user");
