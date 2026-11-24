@@ -24,7 +24,7 @@ test("trip planning, saved history, bilingual chat and PDF stay available",async
   const shell=await read("components/ChatShell.jsx");
   assert.match(shell,/className="imperial-side-menu"/);
   assert.match(shell,/Plan a trip/);
-  assert.match(shell,/Travel Tips/);
+  assert.match(shell,/Travel tips/);
   assert.match(shell,/onClick=\{startNewTrip\}/);
   assert.match(shell,/onClick=\{\(\) => chooseSuggestion\(suggestion\.prompt\)\}/);
   assert.match(shell,/onClick=\{downloadItineraryPdf\}/);
