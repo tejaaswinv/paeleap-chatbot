@@ -1,0 +1,3 @@
+# Editorial redesign — 24 November 2026
+
+Based on the supplied reference: ivory paper, compact navigation, flat mountain silhouette, editorial typography, white destination cards, charcoal planning banner and cinnabar actions. The former 3D hero and pointer-tilt postcards are retired from the active application. The main chat, museum persona greetings, authentication, saved history, quick tools, planner and exports retain their existing handlers. Browse all destinations prepares an AI request rather than reopening the discontinued explorer. Responsive layouts and reduced-motion controls are included. No new dependency, image fetch, database change or AI-provider call is introduced by the design.

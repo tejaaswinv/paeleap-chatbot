@@ -5,10 +5,6 @@ import AuthPanel from "./AuthPanel.jsx";
 import TravelMessage from "./TravelMessage.jsx";
 import SmartTripPlanner from "./SmartTripPlanner.jsx";
 import ChinaLandscape from "./ChinaLandscape.jsx";
-import China3DScene from "./China3DScene.jsx";
-import ChinaDestinationArt from "./ChinaDestinationArt.jsx";
-import ChinaHeroOrnament from "./ChinaHeroOrnament.jsx";
-import { applyCardDepth, resetCardDepth } from "../lib/client/visual-depth.js";
 import useTripHistory from "./useTripHistory.js";
 import { getSupabaseBrowserClient } from "../lib/client/supabase.js";
 import { localHistoryForRequest } from "../lib/client/trips.js";
@@ -27,9 +23,9 @@ import {
 
 const text = {
   en: {
-    brandTag: "山海行记 · EXPLORE CHINA",
+    brandTag: "China travel",
     newTrip: "New chat",
-    recent: "TRIP HISTORY",
+    recent: "RECENT",
     untitledTrip: "New trip",
     tripNavigation: "Saved trips",
     openTrips: "Open trips",
@@ -52,9 +48,9 @@ const text = {
     retry: "Try again",
     welcomeKicker: "YOUR CHINA TRAVEL COMPANION",
     welcomeTitle: "A thousand journeys. One unforgettable China.",
-    welcomeBody: "Your AI travel companion for a deeper, more personal China journey.",
+    welcomeBody: "Ask anything — from where to see autumn maples to how to ride the night train to Xi’an.",
     composerLabel: "Ask TourMate",
-    placeholder: "Ask me anything about travelling in China…",
+    placeholder: "Ask about destinations, food, trains, culture…",
     send: "Send message",
     stop: "Stop response",
     enterHint: "Enter to send · Shift + Enter for a new line",
@@ -89,9 +85,9 @@ const text = {
       { key: "heritage_choice", title: "Heritage choice", prompt: "Show West Lake vs Grand Canal choice card" }
     ],
     suggestions: [
-      { title: "Imperial Beijing", body: "Palaces · History · Culture", prompt: "Plan a 4-day 3-night Beijing trip with temples, old neighborhoods and a Great Wall day trip." },
-      { title: "Misty Hangzhou", body: "Lakes · Gardens · Poetry", prompt: "Plan a beautiful and relaxed 2-day itinerary for Hangzhou including West Lake, tea villages and local cultural experiences." },
-      { title: "Ancient Heritage", body: "Old towns · Silk Road · Culture", prompt: "Recommend underrated heritage towns and memorable cultural experiences in China for a first-time traveler." }
+      { title: "Imperial Beijing", body: "Palaces · History · Hutong food", prompt: "Plan a 4-day 3-night Beijing trip with temples, old neighborhoods and a Great Wall day trip." },
+      { title: "Misty Hangzhou", body: "West Lake · Gardens · Tea", prompt: "Plan a beautiful and relaxed 2-day itinerary for Hangzhou including West Lake, tea villages and local cultural experiences." },
+      { title: "Ancient Heritage", body: "Old towns · Silk Road · Craft", prompt: "Recommend underrated heritage towns and memorable cultural experiences in China for a first-time traveler." }
     ]
   },
   zh: {
@@ -220,7 +216,7 @@ function Message({ message, language, copied, onCopy, avatar }) {
           <div className="message-meta">
             {message.createdAt && <time className="message-time" dateTime={message.createdAt}
               title={new Date(message.createdAt).toLocaleString(language === "zh" ? "zh-CN" : "en-US")}>
-              {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" }).format(new Date(message.createdAt))}
+              {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", {  }).format(new Date(message.createdAt))}
             </time>}
             {assistant && <SafetyBadge status={message.safety} reason={message.safetyReason} language={language} />}
             {assistant && message.faq && <span className="grounded-label" title={message.faq.question}>{t.faqLabel} · {message.faq.id}</span>}
@@ -691,15 +687,14 @@ export default function ChatShell() {
   ];
 
   return (
-    <div className="app-shell imperial-tourmate grid min-h-dvh grid-cols-[310px_minmax(0,1fr)] max-[900px]:grid-cols-[245px_minmax(0,1fr)] max-[720px]:block">
+    <div className="app-shell imperial-tourmate editorial-tourmate grid min-h-dvh grid-cols-[210px_minmax(0,1fr)] max-[900px]:grid-cols-[172px_minmax(0,1fr)] max-[720px]:block">
       {sidebarOpen && <button className="sidebar-backdrop" type="button" aria-label={t.closeTrips} onClick={() => { setSidebarOpen(false); historyButtonRef.current?.focus(); }} />}
       <aside id="trips-sidebar" ref={sidebarRef} className={`sidebar ${sidebarOpen ? "is-open" : ""}`} aria-label={t.tripNavigation}>
         <div className="sidebar-brand-row">
           <div>
           <Brand name={personaName} avatar={avatar} />
           <p className="brand-tag">{t.brandTag}</p>
-          {persona && <p className="venue-name">{persona.venue[language]}</p>}
-          {persona?.id === DEFAULT_PERSONA_ID && <div className="sidebar-heritage-sign" aria-hidden="true"><span>山</span><span>海</span><span>行</span><span>记</span></div>}
+          {persona && persona.id !== DEFAULT_PERSONA_ID && <p className="venue-name">{persona.venue[language]}</p>}
           </div>
           <button className="sidebar-close" type="button" aria-label={t.closeTrips} onClick={() => { setSidebarOpen(false); historyButtonRef.current?.focus(); }}><Icon name="close" size={20} /></button>
         </div>
@@ -708,13 +703,16 @@ export default function ChatShell() {
         </button>
         {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
           <nav className="imperial-side-menu" aria-label={language === "zh" ? "旅行导航" : "Travel navigation"}>
+            <button type="button" className="editorial-nav-active" onClick={() => { setSidebarOpen(false); requestAnimationFrame(() => textareaRef.current?.focus()); }}>
+              <Icon name="spark" size={16}/>{language === "zh" ? "旅行对话" : "Travel chat"}
+            </button>
             <button type="button" onClick={openTripPlanner} disabled={!personaReady || historyUnavailable || pending}>
               <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a trip"}
             </button>
             <button type="button" onClick={() => chooseSuggestion(language === "zh"
-              ? "请根据我的兴趣推荐中国独特的文化旅行灵感和目的地。"
-              : "Give me inspiring China travel destination ideas, including unique cultural experiences.")}>
-              <Icon name="spark" size={17}/>{language === "zh" ? "旅行灵感" : "Travel inspiration"}
+              ? "请分享在中国旅行时实用的交通、支付、礼仪和预订小贴士。"
+              : "Share practical travel tips for China, including transport, payments, local etiquette, and what to verify before booking.")}>
+              <Icon name="book" size={17}/>{language === "zh" ? "旅行贴士" : "Travel tips"}
             </button>
             <button type="button" onClick={() => document.getElementById("trips-sidebar-history")?.scrollIntoView({behavior:"smooth",block:"nearest"})}>
               <Icon name="history" size={17}/>{language === "zh" ? "我的行程" : "My trips"}
@@ -754,23 +752,8 @@ export default function ChatShell() {
           <button className="mobile-new-trip" type="button" onClick={startNewTrip} disabled={!history.ready} aria-label={t.newTrip}>
             <Icon name="plus" size={19} />
           </button>
-          {persona?.id === DEFAULT_PERSONA_ID && !needsAuthentication && (
-            <nav className="imperial-topnav" aria-label={language === "zh" ? "主导航" : "Main navigation"}>
-              <button type="button" className="imperial-nav-active"
-                onClick={() => textareaRef.current?.focus()}><Icon name="spark" size={17}/>{language === "zh" ? "AI 旅行对话" : "AI Travel Chat"}</button>
-              <span aria-hidden="true" className="imperial-nav-divider"/>
-              <button type="button" onClick={openTripPlanner} disabled={!personaReady || historyUnavailable || pending}>
-                <Icon name="calendar" size={17}/>{language === "zh" ? "规划旅行" : "Plan a Trip"}</button>
-              <span aria-hidden="true" className="imperial-nav-divider"/>
-              <button type="button" onClick={() => chooseSuggestion(language === "zh"
-                ? "请分享在中国旅行时实用的交通、支付、礼仪和预订小贴士。"
-                : "Share practical travel tips for China, including transport, payments, local etiquette, and what to verify before booking.")}>
-                <Icon name="book" size={17}/>{language === "zh" ? "旅行贴士" : "Travel Tips"}</button>
-            </nav>
-          )}
           <div className="service-pill"><span className={`status-dot ${service.state}`} />{statusLabel}</div>
-          {persona?.id === DEFAULT_PERSONA_ID && <div className="topbar-poem" aria-hidden="true"><span className="topbar-poem-mark">山</span><span>云游四方 · 风雅中国</span></div>}
-          {persona && <span className="profile-identity" title={`${t.profileVersion} ${persona.version}`}>{personaName}</span>}
+          {persona && persona.id !== DEFAULT_PERSONA_ID && <span className="profile-identity" title={`${t.profileVersion} ${persona.version}`}>{personaName}</span>}
           <div className="topbar-actions">
             <div className="language-toggle" aria-label="Language">
               <button type="button" className={language === "en" ? "active" : ""} onClick={() => changeLanguage("en")} aria-pressed={language === "en"}>EN</button>
@@ -816,16 +799,18 @@ export default function ChatShell() {
               ) : messages.length === 0 ? (
                 <div className="welcome-panel">
                   {persona?.id === DEFAULT_PERSONA_ID ? (
-                    <div className="china-hero-stage imperial-hero">
-                      <ChinaHeroOrnament />
-                      <China3DScene language={language}><ChinaLandscape /></China3DScene>
-                      <div className="china-hero-content">
-                        <div className="china-hero-overline"><span className="china-hero-rule" />{language === "zh" ? "诗与远方 · YOUR CHINA STORY" : "诗与远方 · A JOURNEY THROUGH CHINA"}<span className="china-hero-rule" /></div>
-                        <span className="china-hero-seal" aria-hidden="true">旅<span>行</span></span>
-                        <h1><span className="hero-en-title">{language === "zh" ? "遇见你的中国" : "Find your China."}</span><span className="hero-cn-title">山海之间</span></h1>
-                        <p className="welcome-copy">{t.welcomeBody}</p>
-                        <div className="china-hero-divider" aria-hidden="true"><span />✧<span /></div>
+                    <div className="editorial-hero">
+                      <svg className="editorial-mountains" viewBox="0 0 800 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                        <path fill="#d5cbb6" d="M0 80L100 38 174 73 274 20 345 65 466 41 553 73 668 29 800 77V120H0Z"/>
+                        <path fill="#b9ae96" d="M0 101L125 69 233 100 345 65 468 100 590 75 700 98 800 85V120H0Z"/>
+                        <path fill="#958974" d="M0 112L166 102 315 116 482 105 663 118 800 105V120H0Z"/>
+                      </svg>
+                      <div className="editorial-hero-copy">
+                        <p className="editorial-kicker">{language === "zh" ? "你的 AI 旅行伴侣" : "YOUR AI TRAVEL COMPANION"}</p>
+                        <h1>{language === "zh" ? "遇见你的中国。" : "Find your China."}</h1>
+                        <p className="welcome-copy">{language === "zh" ? "从秋日红叶到西安夜车，关于中国旅行的一切，尽管问我。" : t.welcomeBody}</p>
                       </div>
+                      <span className="editorial-hero-mark" lang="zh" aria-hidden="true">山<span>海</span></span>
                     </div>
                   ) : (
                     <div className="china-persona-intro">
@@ -835,41 +820,31 @@ export default function ChatShell() {
                       <p className="welcome-copy">{persona?.greeting[language] || t.welcomeBody}</p>
                     </div>
                   )}
-                  {persona?.id === DEFAULT_PERSONA_ID && <div className="china-journey-heading"><span className="china-journey-eyebrow">{language === "zh" ? "启程 · 寻找你的下一段故事" : "Get inspired for your next journey"}</span><p>{language === "zh" ? "选一个故事开始，或写下你心中的目的地" : "Explore somewhere extraordinary."}</p></div>}
+                  {persona?.id === DEFAULT_PERSONA_ID && <div className="editorial-destination-heading">
+                    <h2>{language === "zh" ? "从一个地方启程" : "Start with a place"}</h2>
+                    <button type="button" onClick={() => chooseSuggestion(language === "zh" ? "推荐中国不同地区值得游览的目的地，并按旅行兴趣分类。" : "Recommend destinations across China, grouped by travel interests and regions.")}>{language === "zh" ? "浏览更多目的地" : "Browse all destinations"}</button>
+                  </div>}
                   <div className="suggestion-grid grid grid-cols-3 gap-3 text-left max-[900px]:grid-cols-1">
                     {suggestions.map((suggestion, index) => (
-                      <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}
-                        onPointerMove={applyCardDepth} onPointerLeave={resetCardDepth} onBlur={resetCardDepth}>
-                        {persona?.id === DEFAULT_PERSONA_ID && <ChinaDestinationArt index={index}/>}
-                        <span className="suggestion-number"><span className="suggestion-index">0{index + 1}</span><span className="suggestion-chop" aria-hidden="true">{["京","杭","古"][index]}</span></span>
+                      <button key={suggestion.title} type="button" className="suggestion-card" onClick={() => chooseSuggestion(suggestion.prompt)}>
+                        <span className="editorial-card-mark" lang="zh" aria-hidden="true">{(persona?.id === DEFAULT_PERSONA_ID ? ["京","杭","古"] : ["馆","览","问"])[index]}</span>
                         <strong>{suggestion.title}</strong>
-                        <span>{suggestion.body}</span>
-                        <i aria-hidden="true">→</i>
+                        <span className="editorial-card-description">{suggestion.body}</span>
                       </button>
                     ))}
                   </div>
                   {persona?.id === DEFAULT_PERSONA_ID && (
                     <section className="smart-planner-welcome" aria-label={language === "zh" ? "智能行程规划" : "Smart trip planning"}>
                       <div className="smart-planner-welcome-copy">
-                        <span className="smart-planner-welcome-mark" aria-hidden="true">程</span>
                         <div>
-                          <strong>{language === "zh" ? "专属旅程，从这里启程" : "Your next adventure, made personal."}</strong>
-                          <small>{language === "zh" ? "告诉我们你的预算、天数和喜好。" : "Choose your budget, pace, destination and must-sees."}</small>
+                          <strong>{language === "zh" ? "专属旅程，从这里启程" : "Build a trip around you"}</strong>
+                          <small>{language === "zh" ? "告诉我们你的预算、天数和喜好。" : "Set your budget, pace and must-sees — get a day-by-day plan."}</small>
                         </div>
                       </div>
                       <button type="button" className="smart-planner-launch" onClick={openTripPlanner}>
-                        <Icon name="calendar" size={17}/>
-                        {language === "zh" ? "智能规划行程" : "Build my trip"}
-                        <span aria-hidden="true">↗</span>
+                        {language === "zh" ? "智能规划行程" : "Plan my trip"}
                       </button>
                     </section>
-                  )}
-                  {persona?.id === DEFAULT_PERSONA_ID && (
-                    <div className="tool-strip" aria-label={language === "zh" ? "旅途快捷工具" : "Travel quick tools"}>
-                      {t.quickTools.filter(tool => tool.key !== "trip_brief").map(tool => (
-                        <button type="button" key={tool.key} onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>
-                      ))}
-                    </div>
                   )}
                 </div>
               ) : (
@@ -901,6 +876,19 @@ export default function ChatShell() {
             </section>
 
             <div className="composer-area">
+              {persona?.id === DEFAULT_PERSONA_ID && messages.length === 0 && !historyUnavailable && (
+                <nav className="editorial-starter-prompts" aria-label={language === "zh" ? "建议问题" : "Suggested questions"}>
+                  {(language === "zh" ? ["桂林最佳旅行时间？","北京到西安五日游","我需要签证吗？"] : ["Best time to visit Guilin?","5 days, Beijing to Xi’an","Do I need a visa?"]).map(prompt => (
+                    <button key={prompt} type="button" onClick={() => chooseSuggestion(prompt)} disabled={!personaReady || pending}>{prompt}</button>
+                  ))}
+                  <button type="button" className="editorial-more-tools" aria-expanded={toolsExpanded} aria-controls="editorial-welcome-tools" onClick={() => setToolsExpanded(open => !open)}>{language === "zh" ? "更多工具" : "More tools"}</button>
+                </nav>
+              )}
+              {persona?.id === DEFAULT_PERSONA_ID && messages.length === 0 && toolsExpanded && !historyUnavailable && (
+                <nav id="editorial-welcome-tools" className="tool-strip tool-strip-compact" aria-label={language === "zh" ? "旅行工具" : "Travel tools"}>
+                  {t.quickTools.filter(tool => tool.key !== "trip_brief").map(tool => <button key={tool.key} type="button" onClick={() => chooseSuggestion(tool.prompt)}>{tool.title}</button>)}
+                </nav>
+              )}
               {persona?.id === DEFAULT_PERSONA_ID && messages.length > 0 && (
                 <>
                   <div className="chat-utility-toolbar">

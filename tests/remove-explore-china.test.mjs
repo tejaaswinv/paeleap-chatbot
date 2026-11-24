@@ -12,23 +12,18 @@ test("Explore China full-screen page is removed, including obsolete CSS and moda
 
 test("no Explore China navigation or page launcher remains in TourMate",async()=>{
   const shell=await read("components/ChatShell.jsx");
-  const scene=await read("components/China3DScene.jsx");
   const layout=await read("app/layout.jsx");
-  for (const source of [shell,scene,layout]) {
+  for (const source of [shell,layout]) {
     assert.doesNotMatch(source,/ChinaWorldExplorer|navExplorerOpen|immersiveOpen|setImmersiveOpen|onExplorePrompt|china-cinematic.css/);
   }
   assert.doesNotMatch(shell,/Explore China|探索中国|setNavExplorerOpen/);
-  assert.doesNotMatch(scene,/Enter the world|china-3d-enter-control/);
-  assert.match(layout,/import "\.\/china-3d.css";/);
-  assert.match(scene,/className="china-3d-world"/);
-  assert.match(scene,/Rotate the 3D landscape view/);
+  assert.doesNotMatch(layout,/china-3d\.css/);
 });
 
 test("trip planning, saved history, bilingual chat and PDF stay available",async()=>{
   const shell=await read("components/ChatShell.jsx");
   assert.match(shell,/className="imperial-side-menu"/);
-  assert.match(shell,/className="imperial-topnav"/);
-  assert.match(shell,/Plan a Trip/);
+  assert.match(shell,/Plan a trip/);
   assert.match(shell,/Travel Tips/);
   assert.match(shell,/onClick=\{startNewTrip\}/);
   assert.match(shell,/onClick=\{\(\) => chooseSuggestion\(suggestion\.prompt\)\}/);
@@ -36,5 +31,5 @@ test("trip planning, saved history, bilingual chat and PDF stay available",async
   assert.match(shell,/onClick=\{downloadTravelPlan\}/);
   assert.match(shell,/onClick=\{\(\) => changeLanguage\("zh"\)\}/);
   assert.match(shell,/import TravelMessage from "\.\/TravelMessage\.jsx";/);
-  assert.match(shell,/<China3DScene language=\{language\}><ChinaLandscape \/><\/China3DScene>/);
+  assert.match(shell,/className="editorial-mountains"/);
 });

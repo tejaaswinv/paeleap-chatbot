@@ -1,9 +1,9 @@
 import "./globals.css";
 import "./china-theme.css";
-import "./china-3d.css";
 import "./imperial-tourmate.css";
 import "./tourmate-polish.css";
 import "./smart-trip-planner.css";
+import "./editorial-tourmate.css";
 
 export const metadata = {
   title: "Paeleap TourMate",
@@ -14,7 +14,7 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#67120f"
+  themeColor: "#f5f0e6"
 };
 
 export default function RootLayout({ children }) {
