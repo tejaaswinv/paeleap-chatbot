@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createTrip, fetchRemoteMessages, fetchRemoteTrips, mergeRemoteTrips,
   restoreTripCollection, serializeTripCollection, tripStorageKey } from "../lib/client/trips.js";
 import { DEFAULT_PERSONA_ID } from "../lib/client/personas.js";
@@ -11,6 +11,13 @@ export default function useTripHistory(identity, client, personaId = DEFAULT_PER
   const [storageFailed, setStorageFailed] = useState(false);
   const [syncFailed, setSyncFailed] = useState(false);
   const [syncAttempt, setSyncAttempt] = useState(0);
+  const messageLoads = useRef(new Map());
+
+  // Invalidate all outstanding reads when the authenticated scope changes.
+  useEffect(() => () => {
+    for (const controller of messageLoads.current.values()) controller.abort();
+    messageLoads.current.clear();
+  }, [owner, client]);
 
   useEffect(() => {
     setStorageFailed(false);
@@ -54,13 +61,16 @@ export default function useTripHistory(identity, client, personaId = DEFAULT_PER
     if (!identity || identity === "demo" || !client) return undefined;
     const controller = new AbortController();
     setSyncFailed(false);
+    let timedOut = false;
+    const timeout = window.setTimeout(() => { timedOut = true; controller.abort(); }, 30000);
     fetchRemoteTrips(client, controller.signal, personaId).then((rows) => {
       if (controller.signal.aborted) return;
       setCollection((current) => current.owner !== owner ? current : {
         ...current, trips: mergeRemoteTrips(current.trips, rows, personaId)
       });
-    }).catch(() => { if (!controller.signal.aborted) setSyncFailed(true); });
-    return () => controller.abort();
+    }).catch(() => { if (!controller.signal.aborted || timedOut) setSyncFailed(true); })
+      .finally(() => window.clearTimeout(timeout));
+    return () => { timedOut = false; window.clearTimeout(timeout); controller.abort(); };
   }, [identity, owner, personaId, client, syncAttempt]);
 
   const updateTrip = useCallback((id, update) => {
@@ -73,17 +83,26 @@ export default function useTripHistory(identity, client, personaId = DEFAULT_PER
   const activeTrip = collection.owner === owner ? collection.trips.find((trip) => trip.id === collection.activeTripId) : null;
 
   const loadMessages = useCallback((trip) => {
-    if (!trip?.conversationId || !client || trip.loadingHistory) return;
+    if (!trip?.conversationId || !client || messageLoads.current.has(trip.id)) return;
     const controller = new AbortController();
+    messageLoads.current.set(trip.id, controller);
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
     updateTrip(trip.id, { loadingHistory: true, historyError: false });
     fetchRemoteMessages(client, trip.conversationId, controller.signal).then((rows) => {
+      if (messageLoads.current.get(trip.id) !== controller || controller.signal.aborted) return;
       updateTrip(trip.id, (current) => ({ ...current, loaded: true, loadingHistory: false, historyError: false,
         updatedAt: rows.at(-1)?.createdAt || current.updatedAt,
         messages: rows.map((row, index) => {
           const cached = current.messages[index];
           return cached?.role === row.role && cached?.content === row.content ? { ...cached, ...row } : row;
         }) }));
-    }).catch(() => updateTrip(trip.id, { loadingHistory: false, historyError: true }));
+    }).catch(() => {
+      if (messageLoads.current.get(trip.id) === controller)
+        updateTrip(trip.id, { loadingHistory: false, historyError: true });
+    }).finally(() => {
+      window.clearTimeout(timeout);
+      if (messageLoads.current.get(trip.id) === controller) messageLoads.current.delete(trip.id);
+    });
   }, [client, updateTrip]);
 
   useEffect(() => {

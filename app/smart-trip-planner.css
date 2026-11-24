@@ -58,9 +58,6 @@
   color:#96745d;
   font-size:11px;line-height:1.4;
 }
-.imperial-tourmate .smart-planner-mobile-trigger {
-  display:none;
-}
 .smart-planner-backdrop {
   position:fixed;inset:0;z-index:9998;
   display:grid;place-items:center;
@@ -227,13 +224,6 @@
 @media(max-width:720px){
   .imperial-tourmate .smart-planner-welcome{align-items:flex-start;flex-direction:column;gap:11px}
   .imperial-tourmate .smart-planner-launch{width:100%}
-  .imperial-tourmate .smart-planner-mobile-trigger{
-    display:flex;align-items:center;justify-content:center;gap:6px;
-    min-width:39px;min-height:39px;
-    padding:8px;
-    color:#ffdfb8;background:#76201a;
-    border:1px solid #d4a267;border-radius:9px;
-  }
   .smart-planner-backdrop{padding:8px;align-items:center}
   .smart-planner{max-height:96dvh;border-radius:12px}
   .smart-planner-top{padding:15px}

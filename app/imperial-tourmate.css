@@ -343,16 +343,6 @@
   text-shadow:0 1px 6px #fff5e8;
 }
 .imperial-tourmate .china-hero-divider {display:none}
-.imperial-tourmate .china-3d-enter-control {
-  z-index:9;
-  left:18px;bottom:15px;
-  min-height:39px;
-  padding:5px 10px;
-  background:linear-gradient(120deg,#821e19,#ab4432);
-  border-color:#f0c284a0;
-  box-shadow:0 5px 15px #67261d52;
-}
-.imperial-tourmate .china-3d-enter-spark {width:26px;height:26px}
 .imperial-tourmate .china-3d-view-control {
   z-index:9;
   right:17px;bottom:15px;
@@ -692,7 +682,6 @@
   .imperial-tourmate .china-hero-content .hero-cn-title {font-size:22px;letter-spacing:.22em}
   .imperial-tourmate .china-hero-content .welcome-copy {font-size:10px;max-width:280px}
   .imperial-tourmate .china-hero-seal {top:48px;right:7%;scale:.77}
-  .imperial-tourmate .china-3d-enter-control {left:10px;bottom:9px;font-size:9px;min-height:34px;padding:4px 7px}
   .imperial-tourmate .china-3d-view-control {right:9px;bottom:9px;font-size:9px;padding:4px 7px}
   .imperial-tourmate .china-journey-heading {margin:17px 0 11px}
   .imperial-tourmate .china-journey-eyebrow {font-size:17px}
