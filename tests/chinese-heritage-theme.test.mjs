@@ -27,8 +27,8 @@ test("chat opens an immersive bilingual hero but keeps custom museum persona gre
   assert.match(ui,/import ChinaLandscape from "\.\/ChinaLandscape\.jsx"/);
   assert.match(ui,/persona\?\.id === DEFAULT_PERSONA_ID \? \(/);
   assert.match(ui,/<ChinaLandscape \/>/);
-  assert.match(ui,/hero-cn-title/);
-  assert.match(ui,/山海之间/);
+  assert.match(ui,/editorial-hero-mark/);
+  assert.match(ui,/山<span>海<\/span>/);
   assert.match(ui,/Find your China/);
   assert.match(ui,/persona\?\.greeting\[language\]/);
   assert.match(ui,/<AuthPanel language=\{language\} client=\{authClient\} \/>/);
