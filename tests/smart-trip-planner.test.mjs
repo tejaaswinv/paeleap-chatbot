@@ -109,11 +109,11 @@ test("full-access guided form respects keyboard focus, scroll locking and mobile
   assert.doesNotMatch(css,/@import|url\(https?:\/\/|@font-face/);
 });
 
-test("planner works from sidebar, topnav and both welcome and active-chat views",async()=>{
+test("planner works from sidebar, welcome and active-chat views",async()=>{
   const ui=await read("components/ChatShell.jsx");
   assert.match(ui,/import SmartTripPlanner from "\.\/SmartTripPlanner\.jsx";/);
   assert.match(ui,/function openTripPlanner\(event\)/);
-  assert.ok((ui.match(/onClick=\{openTripPlanner\}/g)||[]).length>=4);
+  assert.ok((ui.match(/onClick=\{openTripPlanner\}/g)||[]).length>=3);
   assert.match(ui,/className="smart-planner-welcome"/);
   assert.match(ui,/className="chat-plan-trip"/);
   assert.match(ui,/plannerOpen && persona\?\.id === DEFAULT_PERSONA_ID && !needsAuthentication/);
