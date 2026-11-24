@@ -216,7 +216,7 @@ function Message({ message, language, copied, onCopy, avatar }) {
           <div className="message-meta">
             {message.createdAt && <time className="message-time" dateTime={message.createdAt}
               title={new Date(message.createdAt).toLocaleString(language === "zh" ? "zh-CN" : "en-US")}>
-              {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", {  }).format(new Date(message.createdAt))}
+              {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" }).format(new Date(message.createdAt))}
             </time>}
             {assistant && <SafetyBadge status={message.safety} reason={message.safetyReason} language={language} />}
             {assistant && message.faq && <span className="grounded-label" title={message.faq.question}>{t.faqLabel} · {message.faq.id}</span>}
@@ -729,7 +729,7 @@ export default function ChatShell() {
             <span className="trip-description">
               <strong>{trip.title || t.untitledTrip}</strong>
               <small>
-                {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(trip.updatedAt))}
+                {new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric" }).format(new Date(trip.updatedAt))}
                 {trip.pending && <span className="trip-pending" aria-label={t.thinking}> ···</span>}
               </small>
             </span>
